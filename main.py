@@ -1,0 +1,94 @@
+from config.config import Config
+from sys import modules
+from importlib.util import spec_from_file_location, module_from_spec
+from bot_helper.Database.User_Data import clear_restart
+from pathlib import Path
+from glob import glob
+from bot_helper.Aria2.Aria2_Engine import start_listener
+from bot_helper.Telegram.Telegram_Client import Telegram
+
+
+#////////////////////////////////////Variables////////////////////////////////////#
+working_dir = "./bot"
+files = glob(f'{working_dir}/*.py')
+DATA = Config.DATA
+sudo_users = Config.SUDO_USERS
+LOGGER = Config.LOGGER
+
+###############------Load_Plugins------###############
+def load_plugins(plugin_name):
+    path = Path(f"{working_dir}/{plugin_name}.py")
+    name = "main.plugins.{}".format(plugin_name)
+    spec = spec_from_file_location(name, path)
+    load = module_from_spec(spec)
+    spec.loader.exec_module(load)
+    modules["main.plugins." + plugin_name] = load
+    LOGGER.info("🔷Successfully Imported " + plugin_name)
+    return
+
+###############------Get_Plugins------###############
+for name in files:
+    with open(name) as a:
+        patt = Path(a.name)
+        plugin_name = patt.stem
+        load_plugins(plugin_name.replace(".py", ""))
+
+###############------Get_Client_Details-----###############
+async def get_me(client):
+    return await client.get_me()
+
+
+###############------Check_Restart------###############
+async def check_restart():
+    try:
+        chat, msg_id = DATA['restart'][0]
+        await clear_restart()
+        await Telegram.TELETHON_CLIENT.edit_message(chat, msg_id, '✅Restarted Successfully')
+    except Exception as e:
+        LOGGER.info("🧩Error While Updating Restart Message:\n\n", e)
+    return
+
+###############------Start_User_Session------###############
+def start_user_account():
+    Telegram.TELETHON_USER_CLIENT.start()
+    user = Telegram.TELETHON_CLIENT.loop.run_until_complete(get_me(Telegram.TELETHON_USER_CLIENT))
+    first_name = user.first_name
+    if not user.premium:
+        LOGGER.info(f"⛔User Account {first_name} Don't Have Telegram Premium, 2GB Limit Will Be Used For Telegram Uploading.")
+    else:
+        LOGGER.info(f"💎Telegram Premium Found For  User {first_name}")
+    LOGGER.info(f'🔒Session For {first_name} Started Successfully!🔒')
+    return
+
+###############------Restart_Notification------###############
+async def notify_restart(RESTART_NOTIFY_ID):
+    try:
+        await Telegram.TELETHON_CLIENT.send_message(RESTART_NOTIFY_ID, "⚡Bot Started Successfully⚡")
+    except Exception as e:
+        LOGGER.info("❗Failed To Send Restart Notification ", e)
+    return
+
+
+if __name__ == "__main__":
+    LOGGER.info("🔶Starting Telethon Bot")
+    Telegram.TELETHON_CLIENT.start(bot_token=Config.TOKEN)
+    telethob_bot = Telegram.TELETHON_CLIENT.loop.run_until_complete(get_me(Telegram.TELETHON_CLIENT))
+    LOGGER.info("🔶Checking For Restart Notification")
+    if Config.SAVE_TO_DATABASE and 'restart' in DATA and len(DATA['restart']):
+        Telegram.TELETHON_CLIENT.loop.run_until_complete(check_restart())
+    elif Config.RESTART_NOTIFY_ID:
+        Telegram.TELETHON_CLIENT.loop.run_until_complete(notify_restart(Config.RESTART_NOTIFY_ID))
+    if Config.USE_PYROGRAM:
+        LOGGER.info("🔶Starting Pyrogram Bot")
+        pyrogram_bot = Telegram.PYROGRAM_CLIENT.start()
+        LOGGER.info(f'✅Pyrogram Session For @{pyrogram_bot.get_me().username} Started Successfully!✅')
+    else:
+        LOGGER.info("🔶Not Starting Pyrogram bot")
+    if Telegram.TELETHON_USER_CLIENT:
+        start_user_account()
+    else:
+        LOGGER.info("🔶Not Starting User Session")
+    start_listener()
+    LOGGER.info(f'✅@{telethob_bot.username} Started Successfully!✅')
+    LOGGER.info(f"⚡Bot By Sahil Nolia⚡")
+    Telegram.TELETHON_CLIENT.run_until_disconnected()
