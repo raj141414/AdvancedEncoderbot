@@ -1,4 +1,4 @@
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 from bot_helper.Database.User_Data import get_data
 from re import escape
 from asyncio import create_subprocess_exec

@@ -1,6 +1,6 @@
 from bot_helper.Database.User_Data import get_data
-from bot_helper.Helper_Functions import get_video_duration
-from bot_helper.Names import Names
+from bot_helper.Others.Helper_Functions import get_video_duration
+from bot_helper.Others.Names import Names
 from os.path import isdir
 from os import makedirs
 
@@ -92,3 +92,24 @@ def get_commands(process_status):
                 command+= ['-vsync', '1', '-async', '-1']
         command+= ['-preset', watermark_preset, '-crf', f'{str(watermark_crf)}', '-y', f'{str(output_file)}']
         return command, log_file, input_file, output_file, file_duration
+    
+    if process_status.process_type==Names.merge:
+            merge_map = get_data()[process_status.user_id]['merge']['map']
+            create_direc(f"{process_status.dir}/merge/")
+            infile_names = ""
+            for dwfile_loc in process_status.send_files:
+                infile_names += f"file '{str(dwfile_loc)}'\n"
+            input_file = f"{process_status.dir}/merge/merge_files.txt"
+            with open(input_file, "w", encoding="utf-8") as f:
+                        f.write(str(infile_names).strip('\n'))
+            output_file = f"{process_status.dir}/merge/{get_output_name(process_status)}"
+            command = ["ffmpeg",
+                                        "-f",
+                                        "concat",
+                                        "-safe",
+                                        "0",
+                                        "-i", f'{str(input_file)}']
+            if merge_map:
+                command+=['-map','0']
+            command+= ["-c", "copy", '-y', f'{str(output_file)}']
+            return command, False, input_file, output_file, False

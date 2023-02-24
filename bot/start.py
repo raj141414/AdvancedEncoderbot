@@ -1,6 +1,6 @@
 from config.config import Config
 from telethon import events, Button
-from bot_helper.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time
+from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time
 from os.path import exists
 from asyncio import sleep as asynciosleep
 from os import execl
@@ -15,11 +15,11 @@ from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_u
 from bot_helper.Process.Running_Process import remove_running_process
 from asyncio import Lock
 from psutil import virtual_memory, cpu_percent, disk_usage
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from re import findall
 from requests import get
-from bot_helper.SpeedTest import speedtest
+from bot_helper.Others.SpeedTest import speedtest
 
 status_update = {}
 status_update_lock = Lock()
@@ -106,24 +106,39 @@ def owner_checker(event):
 
 ###############------Get_Link------###############
 async def get_link(event):
-    commands = event.message.message.split(' ')
+    custom_file_name = False
+    if "|" in event.message.message:
+        ext_data = event.message.message.split('|')
+        custom_file_name = str(ext_data[-1]).strip()
+        commands = ext_data[1].split(' ')
+    else:
+        commands = event.message.message.split(' ')
     if len(commands)==2:
             if str(commands[1]).startswith("http") or is_magnet(commands[1]):
-                return commands[1]
+                return commands[1], custom_file_name
             else:
-                return "invalid"
+                return "invalid", custom_file_name
     else:
             if event.reply_to_msg_id:
                 msg_object = await TELETHON_CLIENT.get_messages(event.message.chat.id, ids=event.reply_to_msg_id)
                 if not msg_object.file:
                     if str(msg_object.message).startswith("http") or is_magnet(str(msg_object.message)):
-                        return str(msg_object.message)
+                        return str(msg_object.message), custom_file_name
                     else:
-                        return "invalid"
+                        return "invalid", custom_file_name
                 else:
-                    return msg_object
+                    return msg_object, custom_file_name
             else:
-                return False
+                return False, custom_file_name
+
+
+###############------Get_Custom_Name------###############
+async def get_custom_name(event):
+    custom_file_name = False
+    if "|" in event.message.message:
+        ext_data = event.message.message.split('|')
+        custom_file_name = str(ext_data[-1]).strip()
+    return custom_file_name
 
 ###############------Ask_Text------###############
 async def ask_text(chat_id, user_id, event, timeout, message, text_type):
@@ -180,7 +195,7 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
                         await ask.reply('❌Magnet Link Are Not Allowed.')
                         return "stopped"
                 else:
-                    await ask.reply(f'❗You already started a task, now send {str(new_event.message.message)} command again.')
+                    await ask.reply(f'❗You have already started {str(new_event.message.message).replace("/")} task.')
                     return "cancelled"
 
 ###############------Get_Thumbnail------###############
@@ -452,7 +467,7 @@ async def _compress_video(event):
         user_id = event.message.sender.id
         if user_id not in get_data():
                 await new_user(user_id, SAVE_TO_DATABASE)
-        link = await get_link(event)
+        link, custom_file_name = await get_link(event)
         if link=="invalid":
             await event.reply("❗Invalid link")
             return
@@ -464,7 +479,7 @@ async def _compress_video(event):
                 return
         user_name = get_username(event)
         user_first_name = event.message.sender.first_name
-        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.compress)
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.compress, custom_file_name)
         await get_thumbnail(process_status, ["/compress", "pass"], 120)
         task = {}
         task['process_status'] = process_status
@@ -545,7 +560,7 @@ async def _add_watermark_to_video(event):
         if not check_watermark:
             await event.reply("❗Failed To Get Watermark.")
             return
-        link = await get_link(event)
+        link, custom_file_name = await get_link(event)
         if link=="invalid":
             await event.reply("❗Invalid link")
             return
@@ -557,7 +572,7 @@ async def _add_watermark_to_video(event):
                 return
         user_name = get_username(event)
         user_first_name = event.message.sender.first_name
-        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.watermark)
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.watermark, custom_file_name)
         await get_thumbnail(process_status, ["/watermark", "pass"], 120)
         task = {}
         task['process_status'] = process_status
@@ -566,6 +581,36 @@ async def _add_watermark_to_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        create_task(add_task(task))
+        await event.reply("✅Task Added\n\nCheck /status")
+        return
+
+
+###############------Compress------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/merge', func=lambda e: user_auth_checker(e)))
+async def _merge_videos(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        custom_file_name = await get_custom_name(event)
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.compress, custom_file_name)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        while True:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/merge", "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+                if type(link)==str:
+                    task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+                else:
+                    task['functions'].append(["TG", [link]])
+            elif new_event=="stopped":
+                break
+        await get_thumbnail(process_status, ["/merge", "pass"], 120)
         create_task(add_task(task))
         await event.reply("✅Task Added\n\nCheck /status")
         return

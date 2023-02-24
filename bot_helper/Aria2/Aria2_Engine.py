@@ -1,11 +1,11 @@
 from aria2p import API as ariaAPI, Client as ariaClient
 from time import time, sleep
 from config.config import Config
-from bot_helper.Helper_Functions import get_readable_time
+from bot_helper.Others.Helper_Functions import get_readable_time
 from threading import Lock
 from re import findall as re_findall
 from threading import Thread
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 
 
 
@@ -271,7 +271,7 @@ class AriaDownloadStatus:
     
     def onDownloadStarted(self):
         self.listener().update_status_message(Names.STATUS_DOWNLOADING)
-        self.listener().append_send_files(self.name())
+        self.listener().append_dw_files(self.name())
         self.listener().set_file_name(self.name())
         return
     

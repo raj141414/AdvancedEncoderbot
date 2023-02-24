@@ -1,17 +1,25 @@
 from asyncio import sleep as asynciosleep
-from bot_helper.Helper_Functions import get_human_size, gen_random_string, get_readable_time, get_value, get_account_type
+from bot_helper.Others.Helper_Functions import get_human_size, gen_random_string, get_readable_time, get_value, get_account_type
 from os import remove
 from config.config import Config
 from time import time
 from bot_helper.Process.Running_Process import check_running_process
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 from re import findall as refindall
 from math import floor
 from asyncio import wait_for, create_subprocess_exec
 from asyncio.subprocess import PIPE as asyncioPIPE
 from bot_helper.Database.User_Data import get_data
 from json import loads
-from os.path import getsize
+from os.path import getsize, isdir, isfile
+from shutil import move as shutil_move
+from os import makedirs, rename
+
+
+def create_direc(direc):
+    if not isdir(direc):
+        makedirs(direc)
+    return
 
 
 LOGGER = Config.LOGGER
@@ -141,7 +149,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
 
 
 class ProcessStatus:
-        def __init__(self, user_id, chat_id, user_name, user_first_name, event, process_type, file_name=False, thumbnail=False, start_time=False):
+        def __init__(self, user_id, chat_id, user_name, user_first_name, event, process_type, file_name=False, thumbnail=False, start_time=False, generate_sample_video=True, generate_screenshoots=True):
                 self.user_id = user_id
                 self.chat_id = chat_id
                 self.amap_options =  '0:a'
@@ -150,6 +158,7 @@ class ProcessStatus:
                 self.event = event
                 self.dir = f"{download_dir}/{user_id}/{gen_random_string(5)}"
                 self.send_files = []
+                self.dw_files = []
                 self.file_name = file_name
                 self.status_message_id = gen_random_string(5)
                 self.process_id = gen_random_string(10)
@@ -159,6 +168,8 @@ class ProcessStatus:
                 self.thumbnail = thumbnail
                 self.process_type = process_type
                 self.start_time = start_time
+                self.generate_screenshoots = generate_screenshoots
+                self.generate_sample_video = generate_sample_video
                 if self.user_name:
                         self.added_by = f'[{self.user_first_name}](https://t.me/{str(self.user_name)})'
                 else:
@@ -166,6 +177,11 @@ class ProcessStatus:
         
         def update_status_message(self, message):
                 self.message = message
+                return
+        
+        
+        def update_process_message(self, text):
+                self.status_message = text
                 return
         
         def set_custom_thumbnail(self, thumbnail):
@@ -189,11 +205,23 @@ class ProcessStatus:
                 return
         
         def append_send_files(self, name):
-                self.send_files.append(f"{self.dir}/{name}")
+                if f"{self.dir}/{name}" not in self.send_files:
+                        self.send_files.append(f"{self.dir}/{name}")
                 return
         
         def append_send_files_loc(self, fileloc):
-                self.send_files.append(fileloc)
+                if fileloc not in self.send_files:
+                        self.send_files.append(fileloc)
+                return
+        
+        def append_dw_files_loc(self, fileloc):
+                if fileloc not in self.dw_files:
+                        self.dw_files.append(fileloc)
+                return
+        
+        def append_dw_files(self, name):
+                if f"{self.dir}/{name}" not in self.dw_files:
+                        self.dw_files.append(f"{self.dir}/{name}")
                 return
         
         def set_file_name(self, file_name):
@@ -207,6 +235,24 @@ class ProcessStatus:
         
         def set_amap_options(self, options):
                 self.amap_options = options
+                return
+        
+        def move_dw_file(self, name):
+                if isfile(f"{self.dir}/{name}"):
+                        if f"{self.dir}/{name}" in self.dw_files:
+                                self.dw_files.remove(f"{self.dir}/{name}")
+                                move_dir = f"{self.dir}/work_files"
+                                create_direc(move_dir)
+                                if isfile(f"{move_dir}/{name}"):
+                                        LOGGER.info(f"Renaming File {move_dir}/{name}")
+                                        rename(f"{move_dir}/{name}", f"{move_dir}/{str(gen_random_string(5))}_{name}")
+                                LOGGER.info(f"Moving File {self.dir}/{name} To {move_dir}/{name}")
+                                shutil_move(f"{self.dir}/{name}", f"{move_dir}/{name}")
+                                self.send_files.append(f"{move_dir}/{name}")
+                        else:
+                                LOGGER.info(f"{self.dir}/{name} Not Found In DW List.")
+                else:
+                        LOGGER.info(f"{self.dir}/{name} File Not Found.")
                 return
         
         async def update_status(self, status):
@@ -259,8 +305,8 @@ class ProcessStatus:
                                                 f"`/cancel process {self.process_id}`"
                                         self.status_message = text
                 if status.type()==Names.aria and status.name():
-                        if f"{self.dir}/{status.name()}" not in self.send_files:
-                                self.send_files.append(f"{self.dir}/{status.name()}")
+                        if f"{self.dir}/{status.name()}" not in self.dw_files:
+                                self.dw_files.append(f"{self.dir}/{status.name()}")
                 return
         
         def telegram_update_status(self,current,total, mode, name, start_time, status, engine, client=False):
@@ -270,7 +316,7 @@ class ProcessStatus:
                 try:
                         speed = current / round(time() - start_time)
                 except:
-                        speed = 0
+                        speed = 1
                 text =f'{status}\n'\
                         f'**Name**: `{name}`\n'\
                         f'{get_progress_bar_string(current,total)} {current * 100 / total:.1f}%\n'\

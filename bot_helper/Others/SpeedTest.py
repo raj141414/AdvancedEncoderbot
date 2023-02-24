@@ -1,4 +1,4 @@
-from bot_helper.Helper_Functions import get_human_size, get_time_from_string
+from bot_helper.Others.Helper_Functions import get_human_size, get_time_from_string
 from speedtest import Speedtest
 
 async def speedtest():

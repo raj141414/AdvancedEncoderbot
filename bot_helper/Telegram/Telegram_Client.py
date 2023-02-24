@@ -2,20 +2,20 @@ from config.config import Config
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from pyrogram import Client as PyrogramClient
-from bot_helper.Helper_Functions import get_video_duration
+from bot_helper.Others.Helper_Functions import get_video_duration
 from bot_helper.Telegram.Fast_Telethon import upload_file, download_file
 from bot_helper.Database.User_Data import get_data
 from time import time
 from telethon.tl.types import DocumentAttributeVideo
 from bot_helper.Process.Running_Process import check_running_process
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 from os.path import isdir, getsize
 from os import makedirs
 from asyncio import sleep
 from bot_helper.FFMPEG.FFMPEG_Processes import FFMPEG
 from bot_helper.Rclone.Rclone_Upload import upload_single_drive
 from os.path import exists
-from bot_helper.Helper_Functions import verify_rclone_account
+from bot_helper.Others.Helper_Functions import verify_rclone_account
 
 
 def create_direc(direc):
@@ -145,7 +145,7 @@ class Telegram:
             file_id = new_event.id
         create_direc(process_status.dir)
         download_location = f"{process_status.dir}/{file_name}"
-        process_status.append_send_files(file_name)
+        process_status.append_dw_files(file_name)
         if get_data()[process_status.user_id]['tgdownload']=="Telethon":
                 try:
                     with open(download_location, "wb") as f:
@@ -174,6 +174,7 @@ class Telegram:
             except Exception as e:
                     await new_event.reply(f"❗Pyrogram Download Error: {str(e)}")
                     return False
+        process_status.move_dw_file(file_name)
         return True
     
     async def upload_videos(process_status):

@@ -5,7 +5,7 @@ from asyncio.subprocess import PIPE as asyncioPIPE
 from bot_helper.Telegram.Telegram_Client import Telegram
 from bot_helper.Process.Running_Process import append_running_process, remove_running_process, check_running_process
 from shutil import rmtree
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 from bot_helper.FFMPEG.FFMPEG_Commands import get_commands
 from bot_helper.FFMPEG.FFMPEG_Status import FfmpegStatus
 from bot_helper.Database.User_Data import get_task_limit, get_data
@@ -13,7 +13,7 @@ from os.path import isfile
 from time import time
 from bot_helper.FFMPEG.FFMPEG_Processes import FFMPEG
 from os.path import exists
-from bot_helper.Helper_Functions import verify_rclone_account
+from bot_helper.Others.Helper_Functions import verify_rclone_account
 from bot_helper.Rclone.Rclone_Upload import upload_drive
 from os import remove
 
@@ -148,6 +148,8 @@ async def start_task(task):
             if aria2_status.process_status!=1:
                 await process_status.event.reply(process_status.message)
                 break
+            else:
+                process_status.move_dw_file(aria2_status.name())
         else:
             download = await Telegram.download_tg_file(process_status, task['functions'][i][1])
             if not download:
@@ -156,23 +158,27 @@ async def start_task(task):
             break
         if i==loop_range-1:
             process_completed = True
-    if process_completed:
+    if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
             process_completed = False
             if process_status.process_type!=Names.merge:
-                await FFMPEG.select_audio(process_status)
-                await FFMPEG.change_metadata(process_status)
+                    await FFMPEG.select_audio(process_status)
+                    await FFMPEG.change_metadata(process_status)
             command, log_file, input_file, output_file, file_duration = get_commands(process_status)
             ffmpeg_process = await create_subprocess_exec(
                                                                                                                     *command,
                                                                                                                     stdout=asyncioPIPE,
                                                                                                                     stderr=asyncioPIPE,
                                                                                                                     )
-            ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
-            trash_objects.append(ffmpeg_status)
-            while True:
-                if isfile(log_file):
-                    break
-            await process_status.update_status(ffmpeg_status)
+            if process_status.process_type!=Names.merge:
+                    ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
+                    trash_objects.append(ffmpeg_status)
+                    while True:
+                        if isfile(log_file):
+                            break
+                    await process_status.update_status(ffmpeg_status)
+            else:
+                process_status.update_process_message(f"{Names.STATUS[process_status.process_type]}")
+                _ , stderr = await ffmpeg_process.communicate()
             if not check_running_process(process_status.process_id):
                 ffmpeg_process.kill()
             else:
@@ -183,13 +189,19 @@ async def start_task(task):
                         process_completed = True
                 else:
                     with open(f"{process_status.dir}/FFMPEG_LOG.txt", "w", encoding="utf-8") as f:
-                            f.write(str(ffmpeg_process.process_logs))
+                            if process_status.process_type!=Names.merge:
+                                    f.write(str(ffmpeg_status.process_logs))
+                            else:
+                                    f.write(str(stderr.decode('utf-8', 'replace').strip()))
+                                    del stderr
                     await process_status.event.client.send_file(process_status.chat_id, file=f"{process_status.dir}/FFMPEG_LOG.txt", allow_cache=False, reply_to=process_status.event.message, caption=f"❌{process_status.process_type} Process Error\n\nReturn Code: {return_code}\n\nFileName: {input_file.split('/')[-1]}")
                     remove(f"{process_status.dir}/FFMPEG_LOG.txt")
     if process_completed:
         await upload_files(process_status)
-        await FFMPEG.gen_sample_video(process_status)
-        await FFMPEG.generate_ss(process_status)
+        if process_status.generate_sample_video:
+                await FFMPEG.gen_sample_video(process_status)
+        if process_status.generate_screenshoots:
+                await FFMPEG.generate_ss(process_status)
     await clear_trash(task, trash_objects)
     await task_manager()
     return

@@ -1,5 +1,5 @@
 from os.path import getsize
-from bot_helper.Names import Names
+from bot_helper.Others.Names import Names
 
 
 

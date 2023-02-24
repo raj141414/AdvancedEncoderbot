@@ -7,7 +7,8 @@ class Names:
     telethon = "Telethon"
     pyrogram = "Pyrogram"
     rclone = "Rclone"
-    STATUS = {compress: "🏮Compressing Video", watermark: "🛺Adding Watermark"}
+    STATUS = {compress: "🏮Compressing", watermark: "🛺Adding Watermark", merge: "🍧Merging"}
+    FFMPEG_PROCESSES = [compress, watermark, merge]
     STATUS_UPLOADING = "🔼Uploading"
     STATUS_CLONING= "🧬Cloning"
     STATUS_DOWNLOADING = "🔽Downloading"

@@ -1,7 +1,7 @@
 from bot_helper.Database.DB_Handler import Database
 from config.config import Config
 from psutil import disk_usage, cpu_percent, swap_memory, cpu_count, virtual_memory, net_io_counters
-from bot_helper.Helper_Functions import get_human_size, get_size
+from bot_helper.Others.Helper_Functions import get_human_size, get_size
 
 
 #////////////////////////////////////Variables////////////////////////////////////#

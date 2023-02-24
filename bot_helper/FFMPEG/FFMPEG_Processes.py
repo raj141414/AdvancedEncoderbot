@@ -1,6 +1,6 @@
 from bot_helper.Database.User_Data import get_data
 from json import loads
-from bot_helper.Helper_Functions import execute, get_video_duration, get_readable_time, delete_trash
+from bot_helper.Others.Helper_Functions import execute, get_video_duration, get_readable_time, delete_trash
 from config.config import Config
 from asyncio import create_subprocess_exec, sleep
 from asyncio.subprocess import PIPE as asyncioPIPE
