@@ -57,11 +57,6 @@ def __onDownloadStarted(api, gid):
             break
         retry+=1
         sleep(1)
-    while True:
-        if download.is_removed or download.followed_by_ids:
-            print("removed started")
-            break
-        download = download.live
     if not found:
             LOGGER.info(f"onDownloadStarted: {gid} function not found")
     return
@@ -161,7 +156,7 @@ class Aria2:
             if download.error_message:
                 error = str(download.error_message).replace('<', ' ').replace('>', ' ')
                 LOGGER.info(f"Download Error: {error}")
-                listener().update_status_message(f"❌Download Error: {error}")
+                listener.update_status_message(f"❌Download Error: {error}")
                 LOGGER.info(f"ARIA2 DOWNLOAD ERROR: {error}")
                 return False, False
             with aria2_download_list_lock:
