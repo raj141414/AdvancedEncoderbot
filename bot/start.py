@@ -596,7 +596,7 @@ async def _merge_videos(event):
         custom_file_name = await get_custom_name(event)
         user_name = get_username(event)
         user_first_name = event.message.sender.first_name
-        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.compress, custom_file_name)
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.merge, custom_file_name)
         task = {}
         task['process_status'] = process_status
         task['functions'] = []
