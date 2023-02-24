@@ -14,5 +14,7 @@ RUN bash install.sh
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+ENV PORT = 8000
+EXPOSE 8000
 
-CMD ["python3","-u","main.py"]
+CMD sh start.sh

@@ -1,7 +1,12 @@
-version: "3.3"
+version: "2"
 
 services:
-  app:
+
+  web:
     build: .
-    command: python3 -u main.py
-    restart: on-failure
+    volumes:
+      - .:/app
+    restart: always
+    command: sh start.sh
+    ports:
+      - 8000:8000
