@@ -551,6 +551,7 @@ async def _settings(event):
         [Button.inline('📝 Progress Bar', 'progress_settings')],
         [Button.inline('🏮 Compression', 'compression_settings')],
         [Button.inline('🛺 Watermark', 'watermark_settings')],
+        [Button.inline('🍧 Merge', 'merge_settings')],
         [Button.inline('⭕Close Settings', 'close_settings')]
     ])
         return
