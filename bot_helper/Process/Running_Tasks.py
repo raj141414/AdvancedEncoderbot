@@ -138,7 +138,9 @@ async def start_task(task):
     loop_range = len(task['functions'])
     trash_objects = []
     for i in range(loop_range):
+        dw_index = f"{str(i+1)}/{str(loop_range)}"
         if task['functions'][i][0]==Names.aria:
+            process_status.set_dw_index(dw_index)
             download, aria2_status = await task['functions'][i][1](*task['functions'][i][2])
             if not download:
                 await process_status.event.reply(process_status.status_message)
@@ -151,7 +153,7 @@ async def start_task(task):
             else:
                 process_status.move_dw_file(aria2_status.name())
         else:
-            download = await Telegram.download_tg_file(process_status, task['functions'][i][1])
+            download = await Telegram.download_tg_file(process_status, task['functions'][i][1], dw_index)
             if not download:
                 break
         if not check_running_process(process_status.process_id):
@@ -177,7 +179,7 @@ async def start_task(task):
                             break
                     await process_status.update_status(ffmpeg_status)
             else:
-                process_status.update_process_message(f"{Names.STATUS[process_status.process_type]}")
+                process_status.update_process_message(f"{Names.STATUS[process_status.process_type]} [{str(len(process_status.send_files))} Files]\n{process_status.get_task_details()}")
                 _ , stderr = await ffmpeg_process.communicate()
             if not check_running_process(process_status.process_id):
                 ffmpeg_process.kill()

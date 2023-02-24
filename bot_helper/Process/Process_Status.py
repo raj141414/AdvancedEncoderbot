@@ -159,6 +159,7 @@ class ProcessStatus:
                 self.dir = f"{download_dir}/{user_id}/{gen_random_string(5)}"
                 self.send_files = []
                 self.dw_files = []
+                self.dw_index = "-/-"
                 self.file_name = file_name
                 self.status_message_id = gen_random_string(5)
                 self.process_id = gen_random_string(10)
@@ -237,6 +238,10 @@ class ProcessStatus:
                 self.amap_options = options
                 return
         
+        def set_dw_index(self, dw_index):
+                self.dw_index = dw_index
+                return
+        
         def move_dw_file(self, name):
                 if isfile(f"{self.dir}/{name}"):
                         if f"{self.dir}/{name}" in self.dw_files:
@@ -255,13 +260,16 @@ class ProcessStatus:
                         LOGGER.info(f"{self.dir}/{name} File Not Found.")
                 return
         
+        def get_task_details(self):
+                return f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`'
+        
         async def update_status(self, status):
                 if status.type()==Names.ffmpeg:
                         ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
                 while True:
                                 if status.type()==Names.aria:
                                         if status.process_status==0:
-                                                text =f'{status.status()}\n'\
+                                                text =f'{status.status()} [{self.dw_index}]\n'\
                                                         f'**Name**: `{str(status.name())}`\n'\
                                                         f'{get_progress_bar_from_percentage(status.progress())} {status.progress()}\n'\
                                                         f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\

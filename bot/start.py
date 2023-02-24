@@ -158,10 +158,12 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type):
                 return False
 
 ###############------Ask Media OR URL------###############
-async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, mtype, s_handle, allow_magnet=True, allow_url=True):
+async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, mtype, s_handle, allow_magnet=True, allow_url=True, message_hint=False, allow_command=False):
     async with TELETHON_CLIENT.conversation(chat_id) as conv:
             handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: e.message.file or str(e.message.message) in keywords or str(e.message.message).startswith("http")), timeout=timeout)
             msg = f"*️⃣ {str(message)} [{str(timeout)} secs]"
+            if message_hint:
+                msg += f"\n\n{message_hint}"
             ask = await event.reply(msg)
             try:
                 new_event = await handle
@@ -180,7 +182,7 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
                         await ask.reply('✅Task Stopped')
                     return "stopped"
                 elif str(new_event.message.message)=='cancel':
-                    await ask.reply('✅Task Passed/Cancelled')
+                    await ask.reply('✅Task Cancelled')
                     return "cancelled"
                 elif str(new_event.message.message).startswith("http"):
                     if allow_url:
@@ -195,8 +197,12 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
                         await ask.reply('❌Magnet Link Are Not Allowed.')
                         return "stopped"
                 else:
-                    await ask.reply(f'❗You have already started {str(new_event.message.message).replace("/")} task.')
-                    return "cancelled"
+                    if allow_command:
+                            await ask.reply(f'❗You have already started {str(new_event.message.message).replace("/", "")} task.')
+                            return "pass"
+                    else:
+                            await ask.reply(f'❌You already started {str(new_event.message.message).replace("/", "")} task. Now send {str(new_event.message.message)} command again')
+                            return "cancelled"
 
 ###############------Get_Thumbnail------###############
 async def get_thumbnail(process_status, keywords, timeout):
@@ -586,7 +592,7 @@ async def _add_watermark_to_video(event):
         return
 
 
-###############------Compress------###############
+###############------Merge_Videos------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/merge', func=lambda e: user_auth_checker(e)))
 async def _merge_videos(event):
         chat_id = event.message.chat.id
@@ -600,16 +606,29 @@ async def _merge_videos(event):
         task = {}
         task['process_status'] = process_status
         task['functions'] = []
+        file_index = 1
+        Cancel = False
         while True:
-            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/merge", "stop"], "Send Video or URL", 120, "video/", True)
-            if new_event and new_event not in ["cancelled", "stopped"]:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/merge", "stop", "cancel"], f"Send Video or URL No {file_index}", 120, "video/", False, message_hint=f"🔷Send `stop` To Process Merge\n🔷Send `cancel` To Cancel Merge Process", allow_command=True)
+            if new_event and new_event not in ["cancelled", "stopped", "pass"]:
                 link = await get_url_from_message(new_event)
                 if type(link)==str:
                     task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
                 else:
                     task['functions'].append(["TG", [link]])
+                file_index+=1
             elif new_event=="stopped":
                 break
+            elif new_event=="cancelled":
+                Cancel = True
+                break
+        if Cancel:
+            del process_status
+            return
+        if len(task['functions'])<2:
+            del process_status
+            await event.reply("❗Atleast 2 Files Required To Merge")
+            return
         await get_thumbnail(process_status, ["/merge", "pass"], 120)
         create_task(add_task(task))
         await event.reply("✅Task Added\n\nCheck /status")

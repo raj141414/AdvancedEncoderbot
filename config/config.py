@@ -30,6 +30,7 @@ basicConfig(
 )
 
 getLogger("telethon").setLevel(ERROR)
+getLogger("pyrogram").setLevel(ERROR)
 LOGGER = getLogger()
 
 

@@ -131,9 +131,9 @@ class Telegram:
                         break
             return
         
-    async def download_tg_file(process_status, variables):
+    async def download_tg_file(process_status, variables, dw_index):
         start_time = time()
-        status = f"{Names.STATUS_DOWNLOADING}"
+        status = f"{Names.STATUS_DOWNLOADING} [{dw_index}]"
         new_event = variables[0]
         try:
             file_name = new_event.message.file.name
