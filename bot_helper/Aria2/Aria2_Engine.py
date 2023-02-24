@@ -132,7 +132,7 @@ class Aria2:
     
     async def add_aria2c_download(link, listener, filename, auth, ratio, seed_time):
             path = listener.dir
-            args = {'dir': path, 'max-upload-limit': '1K', 'netrc-path': '/usr/src/app/.netrc'}
+            args = {'dir': path, 'max-upload-limit': '1K'}
             a2c_opt = {**Aria2.aria2_options}
             [a2c_opt.pop(k) for k in Aria2.aria2c_global if k in Aria2.aria2_options]
             args.update(a2c_opt)
@@ -155,7 +155,7 @@ class Aria2:
             if download.error_message:
                 error = str(download.error_message).replace('<', ' ').replace('>', ' ')
                 LOGGER.info(f"Download Error: {error}")
-                listener().update_status_message(f"❌Download Error: {error}")
+                listener.update_status_message(f"❌Download Error: {error}")
                 LOGGER.info(f"ARIA2 DOWNLOAD ERROR: {error}")
                 return False, False
             with aria2_download_list_lock:
@@ -178,6 +178,7 @@ class AriaDownloadStatus:
         self.start_time = start_time
         self.seeding = seeding
         self.process_status = 0
+        self.live = False
 
     def __update(self):
         self.__download = self.__download.live

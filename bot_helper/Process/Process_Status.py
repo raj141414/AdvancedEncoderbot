@@ -224,7 +224,6 @@ class ProcessStatus:
                                                         f'**Speed**: {status.speed()} | **ETA**: {status.eta()}\n'\
                                                         f"`/cancel aria {status.gid()}`" 
                                                 self.status_message = text
-                                                await asynciosleep(1)
                                         else:
                                                 LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
                                                 break
@@ -267,7 +266,10 @@ class ProcessStatus:
                 if client:
                         if not check_running_process(self.process_id):
                                 client.stop_transmission()
-                speed = current / round(time() - start_time)
+                try:
+                        speed = current / round(time() - start_time)
+                except:
+                        speed = 0
                 text =f'{status}\n'\
                         f'**Name**: `{name}`\n'\
                         f'{get_progress_bar_string(current,total)} {current * 100 / total:.1f}%\n'\

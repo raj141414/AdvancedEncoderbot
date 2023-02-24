@@ -33,12 +33,13 @@ async def clear_trash(task, trash_objects):
     return
 
 async def upload_files(process_status):
-    r_config = f'./userdata/{str(process_status.user_id)}_rclone.conf'
     drive_uplaod = False
-    if exists(r_config):
-        drive_name = get_data()[process_status.user_id]['drive_name']
-        if verify_rclone_account(r_config, drive_name):
-            drive_uplaod = True
+    if not get_data()[process_status.user_id]['upload_tg']:
+        r_config = f'./userdata/{str(process_status.user_id)}_rclone.conf'
+        if exists(r_config):
+            drive_name = get_data()[process_status.user_id]['drive_name']
+            if verify_rclone_account(r_config, drive_name):
+                drive_uplaod = True
     if not drive_uplaod:
         await Telegram.upload_videos(process_status)
     else:
