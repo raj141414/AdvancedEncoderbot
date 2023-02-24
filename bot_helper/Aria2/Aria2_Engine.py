@@ -47,6 +47,7 @@ def __onDownloadStarted(api, gid):
     LOGGER.info(f"onDownloadStarted: {gid}")
     found = False
     retry = 0
+    download = api.get_download(gid)
     while True:
         if dl := getDownloadByGid(gid):
             dl.onDownloadStarted()
@@ -56,6 +57,11 @@ def __onDownloadStarted(api, gid):
             break
         retry+=1
         sleep(1)
+    while True:
+        if download.is_removed or download.followed_by_ids:
+            print("removed started")
+            break
+        download = download.live
     if not found:
             LOGGER.info(f"onDownloadStarted: {gid} function not found")
     return
@@ -155,7 +161,7 @@ class Aria2:
             if download.error_message:
                 error = str(download.error_message).replace('<', ' ').replace('>', ' ')
                 LOGGER.info(f"Download Error: {error}")
-                listener.update_status_message(f"❌Download Error: {error}")
+                listener().update_status_message(f"❌Download Error: {error}")
                 LOGGER.info(f"ARIA2 DOWNLOAD ERROR: {error}")
                 return False, False
             with aria2_download_list_lock:
@@ -178,7 +184,6 @@ class AriaDownloadStatus:
         self.start_time = start_time
         self.seeding = seeding
         self.process_status = 0
-        self.live = False
 
     def __update(self):
         self.__download = self.__download.live
@@ -316,3 +321,4 @@ class AriaDownloadStatus:
             self.process_status = -2
             self.listener().update_status_message('🔒Task Cancelled By User') 
             Aria2.client.remove([self.__download], force=True, files=True)
+

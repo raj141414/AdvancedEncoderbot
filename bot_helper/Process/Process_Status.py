@@ -224,6 +224,7 @@ class ProcessStatus:
                                                         f'**Speed**: {status.speed()} | **ETA**: {status.eta()}\n'\
                                                         f"`/cancel aria {status.gid()}`" 
                                                 self.status_message = text
+                                                await asynciosleep(1)
                                         else:
                                                 LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
                                                 break
