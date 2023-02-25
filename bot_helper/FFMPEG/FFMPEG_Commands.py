@@ -134,10 +134,14 @@ def get_commands(process_status):
         output_file = f"{process_status.dir}/softmux/{get_output_name(process_status)}"
         file_duration = get_video_duration(input_file)
         input_sub = []
+        sub_map = []
+        smap = 1
         for subtitle in process_status.subtitles:
-            input_sub += ['-i', f"{subtitle}"]
+            input_sub += ['-i', f'{str(subtitle)}']
+            sub_map+= ['-map', f'{smap}:0']
+            smap +=1
         command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
-        command+= input_sub + ['-map','0:v?', '-map',f'{str(map)}?', '-map','0:s?', '-disposition:s:0','default']
+        command+= input_sub + sub_map + ['-map','0:v?', '-map',f'{str(process_status.amap_options)}?', '-map','0:s?', '-disposition:s:0','default']
         if softmux_encode:
                 encoder = get_data()[process_status.user_id]['softmux']['encoder']
                 if softmux_use_crf:
@@ -150,6 +154,43 @@ def get_commands(process_status):
                                 command += ['-vcodec','libx265', '-vtag', 'hvc1', '-preset', softmux_preset]
                         else:
                                 command += ['-vcodec','libx264', '-preset', softmux_preset]
+        else:
+                command += ['-c','copy']
+        command += ["-y", output_file]
+        
+        return command, log_file, input_file, output_file, file_duration
+    
+    elif process_status.process_type==Names.softremux:
+        softremux_preset =  get_data()[process_status.user_id]['softremux']['preset']
+        softremux_crf = get_data()[process_status.user_id]['softremux']['crf']
+        softremux_use_crf = get_data()[process_status.user_id]['softremux']['use_crf']
+        softremux_encode = get_data()[process_status.user_id]['softremux']['encode']
+        create_direc(f"{process_status.dir}/softremux/")
+        log_file = f"{process_status.dir}/softremux/softremux_logs_{process_status.process_id}.txt"
+        input_file = f'{str(process_status.send_files[-1])}'
+        output_file = f"{process_status.dir}/softremux/{get_output_name(process_status)}"
+        file_duration = get_video_duration(input_file)
+        input_sub = []
+        sub_map = []
+        smap = 1
+        for subtitle in process_status.subtitles:
+            input_sub += ['-i', f'{str(subtitle)}']
+            sub_map+= ['-map', f'{smap}:0']
+            smap +=1
+        command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
+        command+= input_sub + sub_map + ['-map','0:v?', '-map',f'{str(process_status.amap_options)}?', '-disposition:s:0','default']
+        if softremux_encode:
+                encoder = get_data()[process_status.user_id]['softremux']['encoder']
+                if softremux_use_crf:
+                        if encoder=='libx265':
+                                command += ['-vcodec','libx265', '-vtag', 'hvc1', '-crf', f'{str(softremux_crf)}', '-preset', softremux_preset]
+                        else:
+                                command += ['-vcodec','libx264', '-crf', f'{str(softremux_crf)}', '-preset', softremux_preset]
+                else:
+                        if encoder=='libx265':
+                                command += ['-vcodec','libx265', '-vtag', 'hvc1', '-preset', softremux_preset]
+                        else:
+                                command += ['-vcodec','libx264', '-preset', softremux_preset]
         else:
                 command += ['-c','copy']
         command += ["-y", output_file]

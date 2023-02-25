@@ -714,3 +714,61 @@ async def _softmux_subtitles(event):
         create_task(add_task(task))
         await event.reply("✅Task Added\n\nCheck /status")
         return
+    
+###############------softremux------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/softremux', func=lambda e: user_auth_checker(e)))
+async def _softremux_subtitles(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softremux", "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.softremux, custom_file_name)
+        file_index = 1
+        Cancel = False
+        while True:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softremux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, "application/", False, message_hint=f"🔷Send `stop` To Process softremux\n🔷Send `cancel` To Cancel softremux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
+            if new_event and new_event not in ["cancelled", "stopped", "pass"]:
+                if new_event.message.file:
+                    sub_name = new_event.message.file.name
+                    create_direc(f"{process_status.dir}/subtitles")
+                    sub_dw_loc = check_file(f"{process_status.dir}/subtitles", sub_name)
+                    sub_path = await new_event.download_media(file=sub_dw_loc)
+                    process_status.append_subtitles(sub_path)
+                    file_index+=1
+                else:
+                    await event.reply("❗Only Telegram File Is Supported")
+            elif new_event=="stopped":
+                break
+            elif new_event=="cancelled":
+                Cancel = True
+                break
+        if Cancel:
+            del process_status
+            return
+        if len(process_status.subtitles)==0:
+            del process_status
+            await event.reply("❗Atleast 1 Files Required To softremux")
+            return
+        await get_thumbnail(process_status, ["/softremux", "pass"], 120)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
+        create_task(add_task(task))
+        await event.reply("✅Task Added\n\nCheck /status")
+        return

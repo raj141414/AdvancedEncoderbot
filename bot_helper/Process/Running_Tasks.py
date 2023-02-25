@@ -166,6 +166,7 @@ async def start_task(task):
                     await FFMPEG.select_audio(process_status)
                     await FFMPEG.change_metadata(process_status)
             command, log_file, input_file, output_file, file_duration = get_commands(process_status)
+            LOGGER.info(str(command))
             ffmpeg_process = await create_subprocess_exec(
                                                                                                                     *command,
                                                                                                                     stdout=asyncioPIPE,

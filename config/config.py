@@ -7,6 +7,8 @@ from os.path import exists
 from os import system, getcwd
 from sys import exit
 from subprocess import run as subprocess_run
+from shutil import rmtree
+
 
 ###############------init aria------###############
 subprocess_run(["chmod", "+x", "aria.sh"])
@@ -101,3 +103,8 @@ class Config:
     except:
         RESTART_NOTIFY_ID = False
         LOGGER.info("🔶Restart Notification ID Not Found")
+
+
+if exists(Config.DOWNLOAD_DIR):
+    LOGGER.info("🔶Clearing Download Directory.")
+    rmtree(Config.DOWNLOAD_DIR)

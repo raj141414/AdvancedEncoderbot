@@ -149,7 +149,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                 return text
         
         else:
-                return "\nStatus Head Not Set"
+                return False
 
 
 
@@ -312,6 +312,7 @@ class ProcessStatus:
                                         if not check_running_process(self.process_id):
                                                         await self.event.reply("🔒Task Cancelled By User")
                                                         break
+                                        error_no = 0
                                         with open(status.log_file, 'r+') as file:
                                                         text = file.read()
                                                         time_in_us = get_value(refindall("out_time_ms=(.+)", text), int, 1)
@@ -321,6 +322,10 @@ class ProcessStatus:
                                                         # fps = get_value(refindall("fps=(.+)", text), str, "0")
                                                         if progress == "end":
                                                                 break
+                                                        elif progress == "error":
+                                                                if error_no==100:
+                                                                        break
+                                                                error_no+=1
                                                         elapsed_time = time_in_us/1000000
                                         if self.process_type!=Names.merge:
                                                         process_state = Names.STATUS[self.process_type]
