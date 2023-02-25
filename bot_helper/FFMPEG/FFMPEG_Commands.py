@@ -1,7 +1,7 @@
 from bot_helper.Database.User_Data import get_data
 from bot_helper.Others.Helper_Functions import get_video_duration
 from bot_helper.Others.Names import Names
-from os.path import isdir
+from os.path import isdir, splitext
 from os import makedirs
 
 def create_direc(direc):
@@ -10,11 +10,15 @@ def create_direc(direc):
     return
     
 
-def get_output_name(process_status):
+def get_output_name(process_status, convert_quality=False):
     if process_status.file_name:
-        return process_status.file_name
+            out_file_name = process_status.file_name
     else:
-        return process_status.send_files[-1].split("/")[-1]
+            out_file_name = process_status.send_files[-1].split("/")[-1]
+    if convert_quality:
+        base_name, extension = splitext(out_file_name)
+        out_file_name = f"{base_name}_{str(convert_quality)}{extension}"
+    return out_file_name
 
 
 def get_commands(process_status):
@@ -194,5 +198,40 @@ def get_commands(process_status):
         else:
                 command += ['-c','copy']
         command += ["-y", output_file]
-        
         return command, log_file, input_file, output_file, file_duration
+    
+    
+    elif process_status.process_type==Names.convert:
+            convert_preset =  get_data()[process_status.user_id]['convert']['preset']
+            convert_crf = get_data()[process_status.user_id]['convert']['crf']
+            convert_map = get_data()[process_status.user_id]['convert']['map']
+            convert_encoder = get_data()[process_status.user_id]['convert']['encoder']
+            convert_copysub = get_data()[process_status.user_id]['convert']['copy_sub']
+            convert_sync = get_data()[process_status.user_id]['convert']['sync']
+            create_direc(f"{process_status.dir}/convert/")
+            log_file = f"{process_status.dir}/convert/convert_logs_{process_status.process_id}.txt"
+            input_file = f'{str(process_status.send_files[-1])}'
+            output_file = f"{process_status.dir}/convert/{get_output_name(process_status, convert_quality=process_status.convert_quality)}"
+            file_duration = get_video_duration(input_file)
+            command = ['ffmpeg','-hide_banner',
+                                            '-progress', f"{log_file}",
+                                            '-i', f'{input_file}'
+                                            '-vf', f"scale=-2:{process_status.convert_quality}"]
+            if convert_map:
+                command+=['-map','0:v?',
+                                            '-map',f'{str(process_status.amap_options)}?',
+                                            "-map", "0:s?"]
+            if convert_copysub:
+                command+= ["-c:s", "copy"]
+            if convert_encoder=='libx265':
+                    command+= ['-vcodec','libx265','-vtag', 'hvc1']
+            else:
+                    command+= ['-vcodec','libx264']
+            convert_use_queue_size = get_data()[process_status.user_id]['convert']['use_queue_size']
+            if convert_use_queue_size:
+                convert_queue_size = get_data()[process_status.user_id]['convert']['queue_size']
+                command+= ['-max_muxing_queue_size', f'{str(convert_queue_size)}']
+            if convert_sync:
+                command+= ['-vsync', '1', '-async', '-1']
+            command+= ['-preset', convert_preset, '-crf', f'{str(convert_crf)}', '-y', f"{output_file}"]
+            return command, log_file, input_file, output_file, file_duration

@@ -110,6 +110,11 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['convert']['map'] = True
         DATA[user_id]['convert']['encode'] = True
         DATA[user_id]['convert']['encoder'] = 'libx265'
+        DATA[user_id]['convert']['copy_sub'] = False
+        DATA[user_id]['convert']['use_queue_size'] = False
+        DATA[user_id]['convert']['sync'] = False
+        DATA[user_id]['convert']['queue_size'] = '9999'
+        DATA[user_id]['convert']['convert_list'] = [720, 480]
         DATA[user_id]['custom_name'] = False
         DATA[user_id]['custom_metadata'] = False
         DATA[user_id]['metadata'] = "Nik66Bots"

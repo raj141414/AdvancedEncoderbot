@@ -147,7 +147,16 @@ def generate_ffmpeg_status_head(user_id, pmode):
         elif pmode==Names.merge:
                 text = f"\n**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
                 return text
-        
+        elif pmode==Names.convert:
+                if get_data()[user_id]['convert']['use_queue_size']:
+                        qsize_text = f"**Queue Size**: {str(get_data()[user_id]['convert']['queue_size'])}"
+                else:
+                        qsize_text = f"**Queue Size**: False"
+                text = f"\n**SYNC**: {get_data()[user_id]['convert']['sync']} | **Preset**: {get_data()[user_id]['convert']['preset']}\n"\
+                        f"**CRF**: {get_data()[user_id]['convert']['crf']} | **Copy Subtitles**: {get_data()[user_id]['convert']['copy_sub']}\n"\
+                        f"{qsize_text} | **MAP**: {get_data()[user_id]['convert']['map']}\n"\
+                        f"**Encoder**: {get_data()[user_id]['convert']['encoder']} | **C.Qualities**: {get_data()[user_id]['convert']['convert_list']}"
+                return text
         else:
                 return False
 
@@ -178,6 +187,8 @@ class ProcessStatus:
                 self.start_time = start_time
                 self.generate_screenshoots = generate_screenshoots
                 self.generate_sample_video = generate_sample_video
+                self.convert_quality = 480
+                self.convert_index = "-/-"
                 if self.user_name:
                         self.added_by = f'[{self.user_first_name}](https://t.me/{str(self.user_name)})'
                 else:
@@ -187,6 +198,13 @@ class ProcessStatus:
                 self.message = message
                 return
         
+        def update_convert_quality(self, convert_quality):
+                self.convert_quality = convert_quality
+                return
+        
+        def update_convert_index(self, convert_index):
+                self.convert_index = convert_index
+                return
         
         def update_process_message(self, text):
                 self.status_message = text
@@ -327,7 +345,11 @@ class ProcessStatus:
                                                                         break
                                                                 error_no+=1
                                                         elapsed_time = time_in_us/1000000
-                                        if self.process_type!=Names.merge:
+                                                        
+                                        if self.process_type!=Names.convert:
+                                                        process_state = f"{Names.STATUS[self.process_type]} ({self.convert_quality}P [{self.convert_index}])"
+                                                        name = status.name
+                                        elif self.process_type!=Names.merge:
                                                         process_state = Names.STATUS[self.process_type]
                                                         name = status.name
                                         else:
