@@ -147,6 +147,9 @@ def generate_ffmpeg_status_head(user_id, pmode):
         elif pmode==Names.merge:
                 text = f"\n**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
                 return text
+        
+        else:
+                return "\nStatus Head Not Set"
 
 
 
@@ -162,6 +165,7 @@ class ProcessStatus:
                 self.dir = f"{download_dir}/{user_id}/{gen_random_string(5)}"
                 self.send_files = []
                 self.dw_files = []
+                self.subtitles = []
                 self.dw_index = "-/-"
                 self.file_name = file_name
                 self.status_message_id = gen_random_string(5)
@@ -213,6 +217,8 @@ class ProcessStatus:
                         self.send_files.append(f"{self.dir}/{name}")
                 return
         
+        
+        
         def append_send_files_loc(self, fileloc):
                 if fileloc not in self.send_files:
                         self.send_files.append(fileloc)
@@ -263,6 +269,17 @@ class ProcessStatus:
                         LOGGER.info(f"{self.dir}/{name} File Not Found.")
                 return
         
+        
+        def append_subtitles(self, sub_loc):
+                if isfile(sub_loc):
+                        if sub_loc not in self.subtitles:
+                                self.subtitles.append(sub_loc)
+                        else:
+                                LOGGER.info(f"{sub_loc} Already In Subtitles.")
+                else:
+                        LOGGER.info(f"{sub_loc} File Not Found.")
+                return
+        
         def get_task_details(self):
                 return f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`'
         
@@ -282,7 +299,7 @@ class ProcessStatus:
                                                         f'**Speed**: {status.speed()} | **ETA**: {status.eta()}\n'\
                                                         f"`/cancel aria {status.gid()}`" 
                                                 self.status_message = text
-                                                await asynciosleep(1)
+                                                await asynciosleep(0.5)
                                         else:
                                                 LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
                                                 break
@@ -322,6 +339,7 @@ class ProcessStatus:
                                                                 f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
                                                                 f"`/cancel process {self.process_id}`"
                                         self.status_message = text
+                                        await asynciosleep(0.5)
                 if status.type()==Names.aria and status.name():
                         if f"{self.dir}/{status.name()}" not in self.dw_files:
                                 self.dw_files.append(f"{self.dir}/{status.name()}")
@@ -344,6 +362,7 @@ class ProcessStatus:
                         f'**Speed**: {get_human_size(speed)}ps | **ETA**: {get_readable_time((total-current)/speed)}\n'\
                         f"`/cancel process {self.process_id}`"
                 self.status_message = text
+                return
                 
                 
         async def rclone__update_status(self, rclone_process, name, search_command, fileloc, r_config, drive_name, status):
@@ -375,7 +394,7 @@ class ProcessStatus:
                                                                 f'**Speed**: {progress[2]} | **ETA**: {eta}\n'\
                                                                 f"`/cancel process {self.process_id}`"
                                                         self.status_message = text
-                                                        await asynciosleep(1)
+                                                        await asynciosleep(0.5)
                                         except Exception as e:
                                                             await self.event.reply(f'❌Error While Updating Rclone Upload Status Message: {str(e)}')
                                                             LOGGER.info(str(e))

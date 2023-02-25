@@ -93,7 +93,7 @@ def get_commands(process_status):
         command+= ['-preset', watermark_preset, '-crf', f'{str(watermark_crf)}', '-y', f'{str(output_file)}']
         return command, log_file, input_file, output_file, file_duration
     
-    if process_status.process_type==Names.merge:
+    elif process_status.process_type==Names.merge:
             merge_map = get_data()[process_status.user_id]['merge']['map']
             merge_fix_blank = get_data()[process_status.user_id]['merge']['fix_blank']
             create_direc(f"{process_status.dir}/merge/")
@@ -122,3 +122,36 @@ def get_commands(process_status):
                 command+= ["-c", "copy"]
             command+= ['-y', f'{str(output_file)}']
             return command, log_file, input_file, output_file, file_duration
+        
+    elif process_status.process_type==Names.softmux:
+        softmux_preset =  get_data()[process_status.user_id]['softmux']['preset']
+        softmux_crf = get_data()[process_status.user_id]['softmux']['crf']
+        softmux_use_crf = get_data()[process_status.user_id]['softmux']['use_crf']
+        softmux_encode = get_data()[process_status.user_id]['softmux']['encode']
+        create_direc(f"{process_status.dir}/softmux/")
+        log_file = f"{process_status.dir}/softmux/softmux_logs_{process_status.process_id}.txt"
+        input_file = f'{str(process_status.send_files[-1])}'
+        output_file = f"{process_status.dir}/softmux/{get_output_name(process_status)}"
+        file_duration = get_video_duration(input_file)
+        input_sub = []
+        for subtitle in process_status.subtitles:
+            input_sub += ['-i', f"{subtitle}"]
+        command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
+        command+= input_sub + ['-map','0:v?', '-map',f'{str(map)}?', '-map','0:s?', '-disposition:s:0','default']
+        if softmux_encode:
+                encoder = get_data()[process_status.user_id]['softmux']['encoder']
+                if softmux_use_crf:
+                        if encoder=='libx265':
+                                command += ['-vcodec','libx265', '-vtag', 'hvc1', '-crf', f'{str(softmux_crf)}', '-preset', softmux_preset]
+                        else:
+                                command += ['-vcodec','libx264', '-crf', f'{str(softmux_crf)}', '-preset', softmux_preset]
+                else:
+                        if encoder=='libx265':
+                                command += ['-vcodec','libx265', '-vtag', 'hvc1', '-preset', softmux_preset]
+                        else:
+                                command += ['-vcodec','libx264', '-preset', softmux_preset]
+        else:
+                command += ['-c','copy']
+        command += ["-y", output_file]
+        
+        return command, log_file, input_file, output_file, file_duration

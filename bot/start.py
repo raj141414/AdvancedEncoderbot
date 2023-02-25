@@ -3,7 +3,8 @@ from telethon import events, Button
 from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time
 from os.path import exists
 from asyncio import sleep as asynciosleep
-from os import execl
+from os import execl, makedirs
+from os.path import isdir, isfile
 from sys import argv, executable
 from bot_helper.Aria2.Aria2_Engine import Aria2, getDownloadByGid
 from bot_helper.Process.Process_Status import ProcessStatus
@@ -35,6 +36,19 @@ LOGGER = Config.LOGGER
 SAVE_TO_DATABASE = Config.SAVE_TO_DATABASE
 
 #////////////////////////////////////Functions////////////////////////////////////#
+
+###############------Create_Dire------###############
+def create_direc(direc):
+    if not isdir(direc):
+        makedirs(direc)
+    return
+
+###############------Check_File------###############
+def check_file(loc, file_name):
+    if isfile(f"{loc}/{file_name}"):
+        return f"{loc}/{gen_random_string(5)}_{file_name}"
+    else:
+        return f"{loc}/{file_name}"
 
 ###############------Download_From_Direct_Link------###############
 def dw_file_from_url(url, filename):
@@ -158,7 +172,7 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type):
                 return False
 
 ###############------Ask Media OR URL------###############
-async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, mtype, s_handle, allow_magnet=True, allow_url=True, message_hint=False, allow_command=False):
+async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, mtype, s_handle, allow_magnet=True, allow_url=True, message_hint=False, allow_command=False, stop_on_url=True):
     async with TELETHON_CLIENT.conversation(chat_id) as conv:
             handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: e.message.file or str(e.message.message) in keywords or str(e.message.message).startswith("http")), timeout=timeout)
             msg = f"*️⃣ {str(message)} [{str(timeout)} secs]"
@@ -189,13 +203,19 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
                         return new_event
                     else:
                         await ask.reply('❌HTTP Link Are Not Allowed.')
-                        return "stopped"
+                        if stop_on_url:
+                            return "stopped"
+                        else:
+                            return "pass"
                 elif is_magnet(str(new_event.message.message)):
                     if allow_magnet:
                         return new_event
                     else:
                         await ask.reply('❌Magnet Link Are Not Allowed.')
-                        return "stopped"
+                        if stop_on_url:
+                            return "stopped"
+                        else:
+                            return "pass"
                 else:
                     if allow_command:
                             await ask.reply(f'❗You have already started {str(new_event.message.message).replace("/", "")} task.')
@@ -232,6 +252,7 @@ async def get_thumbnail(process_status, keywords, timeout):
             return
     else:
         return
+
 
 ###############------Ask_WaterMark------###############
 async def ask_watermark(event, chat_id, user_id, cmd, wt_check):
@@ -631,6 +652,65 @@ async def _merge_videos(event):
             await event.reply("❗Atleast 2 Files Required To Merge")
             return
         await get_thumbnail(process_status, ["/merge", "pass"], 120)
+        create_task(add_task(task))
+        await event.reply("✅Task Added\n\nCheck /status")
+        return
+    
+
+###############------SoftMux------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/softmux', func=lambda e: user_auth_checker(e)))
+async def _softmux_subtitles(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softmux", "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.softmux, custom_file_name)
+        file_index = 1
+        Cancel = False
+        while True:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softmux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, "application/", False, message_hint=f"🔷Send `stop` To Process SoftMux\n🔷Send `cancel` To Cancel SoftMux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
+            if new_event and new_event not in ["cancelled", "stopped", "pass"]:
+                if new_event.message.file:
+                    sub_name = new_event.message.file.name
+                    create_direc(f"{process_status.dir}/subtitles")
+                    sub_dw_loc = check_file(f"{process_status.dir}/subtitles", sub_name)
+                    sub_path = await new_event.download_media(file=sub_dw_loc)
+                    process_status.append_subtitles(sub_path)
+                    file_index+=1
+                else:
+                    await event.reply("❗Only Telegram File Is Supported")
+            elif new_event=="stopped":
+                break
+            elif new_event=="cancelled":
+                Cancel = True
+                break
+        if Cancel:
+            del process_status
+            return
+        if len(process_status.subtitles)==0:
+            del process_status
+            await event.reply("❗Atleast 1 Files Required To SoftMux")
+            return
+        await get_thumbnail(process_status, ["/softmux", "pass"], 120)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
         create_task(add_task(task))
         await event.reply("✅Task Added\n\nCheck /status")
         return
