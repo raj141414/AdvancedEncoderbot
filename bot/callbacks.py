@@ -585,7 +585,7 @@ async def merge_callback(event, txt, user_id):
             KeyBoard.append([Button.inline(f'🍓Map  - {str(merge_map)}', 'nik66bots')])
             for board in gen_keyboard(bool_list, merge_map, "mergemap", 2, False):
                 KeyBoard.append(board)
-            KeyBoard.append([Button.inline(f'🚢Fix Blank Outro  - {str(merge_fix_blank)}', 'nik66bots')])
+            KeyBoard.append([Button.inline(f'🚢Fix Blank Outro  - {str(merge_fix_blank)} [Use Only When Necessary]', 'nik66bots')])
             for board in gen_keyboard(bool_list, merge_fix_blank, "mergefixblank", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'↩Back', 'settings')])

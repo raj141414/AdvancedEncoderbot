@@ -99,8 +99,10 @@ def get_commands(process_status):
             create_direc(f"{process_status.dir}/merge/")
             log_file = f"{process_status.dir}/merge/merge_logs_{process_status.process_id}.txt"
             infile_names = ""
+            file_duration =0
             for dwfile_loc in process_status.send_files:
                 infile_names += f"file '{str(dwfile_loc)}'\n"
+                file_duration += get_video_duration(dwfile_loc)
             input_file = f"{process_status.dir}/merge/merge_files.txt"
             with open(input_file, "w", encoding="utf-8") as f:
                         f.write(str(infile_names).strip('\n'))
@@ -119,4 +121,4 @@ def get_commands(process_status):
             if not merge_fix_blank:
                 command+= ["-c", "copy"]
             command+= ['-y', f'{str(output_file)}']
-            return command, log_file, input_file, output_file, 0
+            return command, log_file, input_file, output_file, file_duration

@@ -145,7 +145,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"**Encoder**: {get_data()[user_id]['watermark']['encoder']}"
                 return text
         elif pmode==Names.merge:
-                text = f"**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
+                text = f"\n**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
                 return text
 
 
@@ -306,8 +306,13 @@ class ProcessStatus:
                                                                 break
                                                         elapsed_time = time_in_us/1000000
                                         if self.process_type!=Names.merge:
-                                                        text =f'{Names.STATUS[self.process_type]}\n'\
-                                                                f'**Name**: `{status.name}`\n'\
+                                                        process_state = Names.STATUS[self.process_type]
+                                                        name = status.name
+                                        else:
+                                                        process_state = f"{Names.STATUS[self.process_type]} [{total_files} Files]"
+                                                        name = str(self.file_name)
+                                        text =f'{process_state}\n'\
+                                                                f'**Name**: `{name}`\n'\
                                                                 f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
                                                                 f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
                                                                 f'**Engine**: FFMPEG'\
@@ -315,14 +320,6 @@ class ProcessStatus:
                                                                 f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
                                                                 f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
                                                                 f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
-                                                                f"`/cancel process {self.process_id}`"
-                                        else:
-                                                text =f'{Names.STATUS[self.process_type]} [{total_files} Files]\n'\
-                                                                f'**Name**: `{status.name}`\n'\
-                                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
-                                                                f'**Engine**: FFMPEG'\
-                                                                f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
-                                                                f'**Speed**: {speed}x\n'\
                                                                 f"`/cancel process {self.process_id}`"
                                         self.status_message = text
                 if status.type()==Names.aria and status.name():

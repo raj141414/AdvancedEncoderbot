@@ -146,6 +146,7 @@ class Telegram:
         create_direc(process_status.dir)
         download_location = f"{process_status.dir}/{file_name}"
         process_status.append_dw_files(file_name)
+        process_status.set_file_name(file_name)
         if get_data()[process_status.user_id]['tgdownload']=="Telethon":
                 try:
                     with open(download_location, "wb") as f:
