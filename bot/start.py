@@ -272,6 +272,43 @@ async def ask_watermark(event, chat_id, user_id, cmd, wt_check):
     return False
 
 
+async def update_status_message(event):
+        reply  = await event.reply("⏳Please Wait")
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        status_update_id = gen_random_string(5)
+        async with status_update_lock:
+            if chat_id not in status_update:
+                status_update[chat_id] = {}
+            status_update[chat_id].clear()
+            status_update[chat_id]['update_id'] = status_update_id
+        await asynciosleep(2)
+        while True:
+            status_message = await get_status_message(reply)
+            if not status_message:
+                await reply.edit(f"No Running Process!\n\n**CPU:** {cpu_percent()}% | **FREE:** {get_human_size(disk_usage('/').free)}\n**RAM:** {virtual_memory().percent}% | **UPTIME:** {get_readable_time(time() - botStartTime)}\n**QUEUED:** {get_queued_tasks_len()} | **TASK LIMIT:** {get_task_limit()}")
+                break
+            if status_update[chat_id]['update_id'] != status_update_id:
+                await reply.delete()
+                break
+            if get_data()[user_id]['show_stats']:
+                status_message += f"**CPU:** {cpu_percent()}% | **FREE:** {get_human_size(disk_usage('/').free)}"
+                status_message += f"\n**RAM:** {virtual_memory().percent}% | **UPTIME:** {get_readable_time(time() - botStartTime)}\n"
+            if get_data()[user_id]['show_time']:
+                    status_message+= "**Current Time:** " + get_current_time() + "\n"
+            status_message += f"**QUEUED:** {get_queued_tasks_len()} | **TASK LIMIT:** {get_task_limit()}"
+            try:
+                await reply.edit(status_message, buttons=[
+                        [Button.inline('⭕ Close', 'close_settings')]])
+            except MessageIdInvalidError:
+                break
+            except Exception as e:
+                LOGGER.info(f"Status Update Error: {str(e)}")
+            await asynciosleep(get_data()[user_id]['update_time'])
+        LOGGER.info(f"Status Updating Complete")
+        return
+
+
 ###############------Save_Rclone_Config------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/saveconfig', func=lambda e: user_auth_checker(e)))
 async def _saverclone(event):
@@ -516,7 +553,7 @@ async def _compress_video(event):
         else:
             task['functions'].append(["TG", [link]])
         create_task(add_task(task))
-        await event.reply("✅Task Added\n\nCheck /status")
+        await update_status_message(event)
         return
 
 
@@ -610,7 +647,7 @@ async def _add_watermark_to_video(event):
         else:
             task['functions'].append(["TG", [link]])
         create_task(add_task(task))
-        await event.reply("✅Task Added\n\nCheck /status")
+        await update_status_message(event)
         return
 
 
@@ -653,7 +690,7 @@ async def _merge_videos(event):
             return
         await get_thumbnail(process_status, ["/merge", "pass"], 120)
         create_task(add_task(task))
-        await event.reply("✅Task Added\n\nCheck /status")
+        await update_status_message(event)
         return
     
 
@@ -712,7 +749,7 @@ async def _softmux_subtitles(event):
         else:
             task['functions'].append(["TG", [link]])
         create_task(add_task(task))
-        await event.reply("✅Task Added\n\nCheck /status")
+        await update_status_message(event)
         return
     
 ###############------softremux------###############
@@ -770,5 +807,5 @@ async def _softremux_subtitles(event):
         else:
             task['functions'].append(["TG", [link]])
         create_task(add_task(task))
-        await event.reply("✅Task Added\n\nCheck /status")
+        await update_status_message(event)
         return
