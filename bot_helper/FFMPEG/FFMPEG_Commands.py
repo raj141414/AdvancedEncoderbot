@@ -1,8 +1,8 @@
 from bot_helper.Database.User_Data import get_data
 from bot_helper.Others.Helper_Functions import get_video_duration
 from bot_helper.Others.Names import Names
-from os.path import isdir, splitext
-from os import makedirs
+from os.path import isdir, splitext, exists
+from os import makedirs, remove
 
 def create_direc(direc):
     if not isdir(direc):
@@ -210,12 +210,14 @@ def get_commands(process_status):
             convert_sync = get_data()[process_status.user_id]['convert']['sync']
             create_direc(f"{process_status.dir}/convert/")
             log_file = f"{process_status.dir}/convert/convert_logs_{process_status.process_id}.txt"
+            if exists(log_file):
+                remove(log_file)
             input_file = f'{str(process_status.send_files[-1])}'
             output_file = f"{process_status.dir}/convert/{get_output_name(process_status, convert_quality=process_status.convert_quality)}"
             file_duration = get_video_duration(input_file)
             command = ['ffmpeg','-hide_banner',
                                             '-progress', f"{log_file}",
-                                            '-i', f'{input_file}'
+                                            '-i', f'{input_file}',
                                             '-vf', f"scale=-2:{process_status.convert_quality}"]
             if convert_map:
                 command+=['-map','0:v?',

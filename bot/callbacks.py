@@ -42,6 +42,7 @@ async def callback(event):
             [Button.inline('🏮 Compression', 'compression_settings')],
             [Button.inline('🛺 Watermark', 'watermark_settings')],
             [Button.inline('🍧 Merge', 'merge_settings')],
+            [Button.inline('🚜 Convert', 'convert_settings')],
             [Button.inline('⭕Close Settings', 'close_settings')]
         ])
             return
@@ -99,6 +100,9 @@ async def callback(event):
             await compress_callback(event, txt, user_id, True)
             return
 
+        elif txt.startswith("convert"):
+            await convert_callback(event, txt, user_id, True)
+            return
 
         elif txt.startswith("merge"):
             await merge_callback(event, txt, user_id)
@@ -593,4 +597,81 @@ async def merge_callback(event, txt, user_id):
                 await event.edit("⚙ Merge Settings", buttons=KeyBoard)
             except:
                 pass
+            return
+
+###############------Convert------###############
+async def convert_callback(event, txt, user_id, edit):
+            new_position = txt.split("_", 1)[1]
+            KeyBoard = []
+            if txt.startswith("convertencoder"):
+                await saveconfig(user_id, 'convert', 'encoder', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Encoder - {str(new_position)}")
+            elif txt.startswith("convertpreset"):
+                await saveconfig(user_id, 'convert', 'preset', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Preset - {str(new_position)}")
+            elif txt.startswith("convertcopysub"):
+                await saveconfig(user_id, 'convert', 'copy_sub', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Copy Subtitles - {str(new_position)}")
+            elif txt.startswith("convertmap"):
+                await saveconfig(user_id, 'convert', 'map', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Map - {str(new_position)}")
+            elif txt.startswith("convertcrf"):
+                await saveconfig(user_id, 'convert', 'crf', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert CRF - {str(new_position)}")
+            elif txt.startswith("convertusequeuesize"):
+                await saveconfig(user_id, 'convert', 'use_queue_size', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Use Queue Size - {str(new_position)}")
+            elif txt.startswith("convertsync"):
+                await saveconfig(user_id, 'convert', 'sync', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Use SYNC - {str(new_position)}")
+            elif txt.startswith("convertlist"):
+                await saveconfig(user_id, 'convert', 'convert_list', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Qualities - {str(new_position)}")
+            convert_encoder = get_data()[user_id]['convert']['encoder']
+            convert_preset = get_data()[user_id]['convert']['preset']
+            convert_crf = get_data()[user_id]['convert']['crf']
+            convert_map = get_data()[user_id]['convert']['map']
+            convert_copysub = get_data()[user_id]['convert']['copy_sub']
+            convert_use_queue_size = get_data()[user_id]['convert']['use_queue_size']
+            convert_queue_size = get_data()[user_id]['convert']['queue_size']
+            convert_sync = get_data()[user_id]['convert']['sync']
+            convert_list = get_data()[user_id]['convert']['convert_list']
+            KeyBoard.append([Button.inline(f'🍬Encoder - {str(convert_encoder)}', 'nik66bots')])
+            for board in gen_keyboard(encoders_list, convert_encoder, "convertencoder", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🍄Copy Subtitles - {str(convert_copysub)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, convert_copysub, "convertcopysub", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🍓Map  - {str(convert_map)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, convert_map, "convertmap", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'📻Use FFMPEG Queue Size  - {str(convert_use_queue_size)}', 'nik66bots')])
+            if convert_use_queue_size:
+                KeyBoard.append([Button.inline(f'🎹FFMPEG Queue Size Value  - {str(convert_queue_size)} (Click To Change)', 'change_convert_queue_size')])
+            for board in gen_keyboard(bool_list, convert_use_queue_size, "convertusequeuesize", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🌳Use SYNC - {str(convert_sync)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, convert_sync, "convertsync", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🎴Convert Qualities - {str(convert_list)}', 'nik66bots')])
+            for board in gen_keyboard([[720, 480],[720], [480]], convert_list, "convertlist", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'♒Preset - {str(convert_preset)}', 'nik66bots')])
+            for board in gen_keyboard(presets_list, convert_preset, "convertpreset", 3, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'⚡CRF  - {str(convert_crf)}', 'nik66bots')])
+            for board in gen_keyboard(crf_list, convert_crf, "convertcrf", 6, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'↩Back', 'settings')])
+            if edit:
+                try:
+                    await event.edit("⚙ Convert Settings", buttons=KeyBoard)
+                except:
+                    pass
+            else:
+                try:
+                    await event.delete()
+                except:
+                    pass
+                await Telegram.TELETHON_CLIENT.send_message(event.chat.id, "⚙ Convert Settings", buttons=KeyBoard)
             return
