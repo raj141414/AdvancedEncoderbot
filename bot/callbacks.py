@@ -654,7 +654,7 @@ async def convert_callback(event, txt, user_id, edit):
             for board in gen_keyboard(bool_list, convert_sync, "convertsync", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🎴Convert Qualities - {str(convert_list)}', 'nik66bots')])
-            for board in gen_keyboard([[720, 480],[720], [480]], convert_list, "convertlist", 2, False):
+            for board in gen_keyboard([[720, 480],[720], [480]], convert_list, "convertlist", 3, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'♒Preset - {str(convert_preset)}', 'nik66bots')])
             for board in gen_keyboard(presets_list, convert_preset, "convertpreset", 3, False):
