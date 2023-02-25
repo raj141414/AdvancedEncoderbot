@@ -144,6 +144,9 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"**W.Size**: {get_data()[user_id]['watermark']['size']} | **W.Position**: {ws_name[get_data()[user_id]['watermark']['position']]}\n"\
                         f"**Encoder**: {get_data()[user_id]['watermark']['encoder']}"
                 return text
+        elif pmode==Names.merge:
+                text = f"**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
+                return text
 
 
 
@@ -266,6 +269,7 @@ class ProcessStatus:
         async def update_status(self, status):
                 if status.type()==Names.ffmpeg:
                         ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
+                total_files = len(self.send_files)
                 while True:
                                 if status.type()==Names.aria:
                                         if status.process_status==0:
@@ -301,16 +305,25 @@ class ProcessStatus:
                                                         if progress == "end":
                                                                 break
                                                         elapsed_time = time_in_us/1000000
-                                        text =f'{Names.STATUS[self.process_type]}\n'\
-                                                f'**Name**: `{status.name}`\n'\
-                                                f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
-                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
-                                                f'**Engine**: FFMPEG'\
-                                                f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
-                                                f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
-                                                f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
-                                                f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
-                                                f"`/cancel process {self.process_id}`"
+                                        if self.process_type!=Names.merge:
+                                                        text =f'{Names.STATUS[self.process_type]}\n'\
+                                                                f'**Name**: `{status.name}`\n'\
+                                                                f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
+                                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
+                                                                f'**Engine**: FFMPEG'\
+                                                                f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
+                                                                f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
+                                                                f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
+                                                                f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
+                                                                f"`/cancel process {self.process_id}`"
+                                        else:
+                                                text =f'{Names.STATUS[self.process_type]} [{total_files} Files]\n'\
+                                                                f'**Name**: `{status.name}`\n'\
+                                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
+                                                                f'**Engine**: FFMPEG'\
+                                                                f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
+                                                                f'**Speed**: {speed}x\n'\
+                                                                f"`/cancel process {self.process_id}`"
                                         self.status_message = text
                 if status.type()==Names.aria and status.name():
                         if f"{self.dir}/{status.name()}" not in self.dw_files:

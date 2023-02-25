@@ -81,6 +81,7 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['merge']['map_audio'] = True
         DATA[user_id]['merge']['map_sub'] = True
         DATA[user_id]['merge']['map'] = True
+        DATA[user_id]['merge']['fix_blank'] = False
         DATA[user_id]['custom_thumbnail'] = False
         DATA[user_id]['convert_video'] = False
         DATA[user_id]['convert_quality'] = [720, 480]

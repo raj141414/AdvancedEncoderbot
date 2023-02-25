@@ -577,9 +577,16 @@ async def merge_callback(event, txt, user_id):
             if txt.startswith("mergemap"):
                 await saveconfig(user_id, 'merge', 'map', eval(new_position), SAVE_TO_DATABASE)
                 await event.answer(f"✅Merge Map - {str(new_position)}")
+            elif txt.startswith("mergefixblank"):
+                await saveconfig(user_id, 'merge', 'fix_blank', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Merge Fix Blank - {str(new_position)}")
             merge_map = get_data()[user_id]['merge']['map']
+            merge_fix_blank = get_data()[user_id]['merge']['fix_blank']
             KeyBoard.append([Button.inline(f'🍓Map  - {str(merge_map)}', 'nik66bots')])
             for board in gen_keyboard(bool_list, merge_map, "mergemap", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🚢Fix Blank Outro  - {str(merge_fix_blank)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, merge_fix_blank, "mergefixblank", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'↩Back', 'settings')])
             try:

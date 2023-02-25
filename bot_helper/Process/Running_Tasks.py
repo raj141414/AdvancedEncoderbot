@@ -171,16 +171,12 @@ async def start_task(task):
                                                                                                                     stdout=asyncioPIPE,
                                                                                                                     stderr=asyncioPIPE,
                                                                                                                     )
-            if process_status.process_type!=Names.merge:
-                    ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
-                    trash_objects.append(ffmpeg_status)
-                    while True:
-                        if isfile(log_file):
-                            break
-                    await process_status.update_status(ffmpeg_status)
-            else:
-                process_status.update_process_message(f"{Names.STATUS[process_status.process_type]} [{str(len(process_status.send_files))} Files]\n{process_status.get_task_details()}")
-                _ , stderr = await ffmpeg_process.communicate()
+            ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
+            trash_objects.append(ffmpeg_status)
+            while True:
+                if isfile(log_file):
+                    break
+            await process_status.update_status(ffmpeg_status)
             if not check_running_process(process_status.process_id):
                 ffmpeg_process.kill()
             else:
@@ -191,11 +187,7 @@ async def start_task(task):
                         process_completed = True
                 else:
                     with open(f"{process_status.dir}/FFMPEG_LOG.txt", "w", encoding="utf-8") as f:
-                            if process_status.process_type!=Names.merge:
-                                    f.write(str(ffmpeg_status.process_logs))
-                            else:
-                                    f.write(str(stderr.decode('utf-8', 'replace').strip()))
-                                    del stderr
+                                f.write(str(ffmpeg_status.process_logs))
                     await process_status.event.client.send_file(process_status.chat_id, file=f"{process_status.dir}/FFMPEG_LOG.txt", allow_cache=False, reply_to=process_status.event.message, caption=f"❌{process_status.process_type} Process Error\n\nReturn Code: {return_code}\n\nFileName: {input_file.split('/')[-1]}")
                     remove(f"{process_status.dir}/FFMPEG_LOG.txt")
     if process_completed:

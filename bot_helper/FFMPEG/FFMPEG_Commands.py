@@ -63,7 +63,7 @@ def get_commands(process_status):
         watermark_path = f'./userdata/{str(process_status.user_id)}_watermark.jpg'
         watermark_sync = get_data()[process_status.user_id]['watermark']['sync']
         create_direc(f"{process_status.dir}/watermark/")
-        log_file = f"{process_status.dir}/watermark/compress_logs_{process_status.process_id}.txt"
+        log_file = f"{process_status.dir}/watermark/watermark_logs_{process_status.process_id}.txt"
         input_file = f'{str(process_status.send_files[-1])}'
         output_file = f"{process_status.dir}/watermark/{get_output_name(process_status)}"
         file_duration = get_video_duration(input_file)
@@ -95,7 +95,9 @@ def get_commands(process_status):
     
     if process_status.process_type==Names.merge:
             merge_map = get_data()[process_status.user_id]['merge']['map']
+            merge_fix_blank = get_data()[process_status.user_id]['merge']['fix_blank']
             create_direc(f"{process_status.dir}/merge/")
+            log_file = f"{process_status.dir}/merge/merge_logs_{process_status.process_id}.txt"
             infile_names = ""
             for dwfile_loc in process_status.send_files:
                 infile_names += f"file '{str(dwfile_loc)}'\n"
@@ -103,13 +105,18 @@ def get_commands(process_status):
             with open(input_file, "w", encoding="utf-8") as f:
                         f.write(str(infile_names).strip('\n'))
             output_file = f"{process_status.dir}/merge/{get_output_name(process_status)}"
-            command = ["ffmpeg",
-                                        "-f",
-                                        "concat",
-                                        "-safe",
-                                        "0",
-                                        "-i", f'{str(input_file)}']
+            command = ['ffmpeg','-hide_banner',
+                                    '-progress', f"{log_file}",
+                                        "-f", "concat",
+                                        "-safe", "0"]
+            if merge_fix_blank:
+                command += ['-segment_time_metadata', '1']
+            command+=["-i", f'{str(input_file)}']
+            if merge_fix_blank:
+                command += ['-vf', 'select=concatdec_select', '-af', 'aselect=concatdec_select,aresample=async=1']
             if merge_map:
                 command+=['-map','0']
-            command+= ["-c", "copy", '-y', f'{str(output_file)}']
-            return command, False, input_file, output_file, False
+            if not merge_fix_blank:
+                command+= ["-c", "copy"]
+            command+= ['-y', f'{str(output_file)}']
+            return command, log_file, input_file, output_file, 0
