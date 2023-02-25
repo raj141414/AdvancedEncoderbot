@@ -291,7 +291,7 @@ class ProcessStatus:
                                 if status.type()==Names.aria:
                                         if status.process_status==0:
                                                 text =f'{status.status()} [{self.dw_index}]\n'\
-                                                        f'**Name**: `{str(status.name())}`\n'\
+                                                        f'`{str(status.name())}`\n'\
                                                         f'{get_progress_bar_from_percentage(status.progress())} {status.progress()}\n'\
                                                         f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
                                                         f'**Engine**: Aria\n'\
@@ -334,7 +334,7 @@ class ProcessStatus:
                                                         process_state = f"{Names.STATUS[self.process_type]} [{total_files} Files]"
                                                         name = str(self.file_name)
                                         text =f'{process_state}\n'\
-                                                                f'**Name**: `{name}`\n'\
+                                                                f'`{name}`\n'\
                                                                 f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
                                                                 f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
                                                                 f'**Engine**: FFMPEG'\
@@ -359,7 +359,7 @@ class ProcessStatus:
                 except:
                         speed = 1
                 text =f'{status}\n'\
-                        f'**Name**: `{name}`\n'\
+                        f'`{name}`\n'\
                         f'{get_progress_bar_string(current,total)} {current * 100 / total:.1f}%\n'\
                         f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
                         f'**Engine**: {engine}\n'\
@@ -391,7 +391,7 @@ class ProcessStatus:
                                                         dwdata = progress[0].strip().split('/')
                                                         eta = progress[3].strip().replace('ETA', '').strip()
                                                         text =f'{status}\n'\
-                                                                f'**Name**: `{name}`\n'\
+                                                                f'`{name}`\n'\
                                                                 f'{get_progress_bar_from_percentage(percentage)} {percentage}%\n'\
                                                                 f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
                                                                 f'**Engine**: {Names.rclone}\n'\

@@ -172,6 +172,7 @@ class FFMPEG:
                 duration = get_video_duration(input_video)
                 if duration>60:
                         file_name = get_output_name(process_status)
+                        process_status.update_process_message(f"🎞Generating Sample Video\n`{str(file_name)}`\n{process_status.get_task_details()}")
                         sample_name = f"{process_status.dir}/sample_{file_name}"
                         vstart_time, vend_time = await get_cut_duration(duration)
                         cmd_sample = ["ffmpeg", "-ss", str(vstart_time), "-to",  str(vend_time), "-i", f"{input_video}","-c", "copy", '-y', f"{sample_name}"]
