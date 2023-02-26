@@ -722,7 +722,7 @@ async def _softmux_subtitles(event):
             new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softmux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process SoftMux\n🔷Send `cancel` To Cancel SoftMux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
             if new_event and new_event not in ["cancelled", "stopped", "pass"]:
                 if new_event.message.file:
-                    if not str(new_event.message.file.mime_type).startswith("video/"):
+                    if not str(new_event.message.file.mime_type).startswith("video/") and not str(new_event.message.file.mime_type).startswith("image/"):
                         if new_event.message.file.size<512000:
                             sub_name = new_event.message.file.name
                             create_direc(f"{process_status.dir}/subtitles")
@@ -733,7 +733,7 @@ async def _softmux_subtitles(event):
                         else:
                             await event.reply("❌Subtitle Size Is More Than 500KB, Is This Really A Subtitle File")
                     else:
-                        await event.reply("❌I Need A Subtitle File Not A Video")
+                        await event.reply("❌I Need A Subtitle File")
                 else:
                     await event.reply("❗Only Telegram File Is Supported")
             elif new_event=="stopped":
@@ -786,7 +786,7 @@ async def _softremux_subtitles(event):
             new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softremux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process softremux\n🔷Send `cancel` To Cancel softremux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
             if new_event and new_event not in ["cancelled", "stopped", "pass"]:
                 if new_event.message.file:
-                    if not str(new_event.message.file.mime_type).startswith("video/"):
+                    if not str(new_event.message.file.mime_type).startswith("video/") and not str(new_event.message.file.mime_type).startswith("image/"):
                         if new_event.message.file.size<512000:
                             sub_name = new_event.message.file.name
                             create_direc(f"{process_status.dir}/subtitles")
@@ -797,7 +797,7 @@ async def _softremux_subtitles(event):
                         else:
                             await event.reply("❌Subtitle Size Is More Than 500KB, Is This Really A Subtitle File")
                     else:
-                        await event.reply("❌I Need A Subtitle File Not A Video")
+                        await event.reply("❌I Need A Subtitle File.")
                 else:
                     await event.reply("❗Only Telegram File Is Supported")
             elif new_event=="stopped":
