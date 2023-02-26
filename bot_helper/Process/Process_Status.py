@@ -164,7 +164,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         qsize_text = f"**Queue Size**: False"
                 text = f"\n**SYNC**: {get_data()[user_id]['hardmux']['sync']} | **Preset**: {get_data()[user_id]['hardmux']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['hardmux']['crf']} | {qsize_text}\n"\
-                        f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode']}"
+                        f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
                 return text
         else:
                 return False

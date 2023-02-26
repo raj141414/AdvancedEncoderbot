@@ -43,7 +43,7 @@ async def callback(event):
             [Button.inline('🛺 Watermark', 'watermark_settings')],
             [Button.inline('🍧 Merge', 'merge_settings')],
             [Button.inline('🚜 Convert', 'convert_settings')],
-            [Button.inline('🚍 HardMux', 'convert_settings')],
+            [Button.inline('🚍 HardMux', 'hardmux_settings')],
             [Button.inline('⭕Close Settings', 'close_settings')]
         ])
             return
@@ -104,7 +104,12 @@ async def callback(event):
         elif txt.startswith("convert"):
             await convert_callback(event, txt, user_id, True)
             return
-
+        
+        elif txt.startswith("hardmux"):
+            await hardmux_callback(event, txt, user_id, True)
+            return
+        
+        
         elif txt.startswith("merge"):
             await merge_callback(event, txt, user_id)
             return
@@ -613,6 +618,9 @@ async def convert_callback(event, txt, user_id, edit):
             if txt.startswith("convertencoder"):
                 await saveconfig(user_id, 'convert', 'encoder', new_position, SAVE_TO_DATABASE)
                 await event.answer(f"✅Convert Encoder - {str(new_position)}")
+            elif txt.startswith("convertencode"):
+                await saveconfig(user_id, 'convert', 'encode', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Convert Use Encoder - {str(new_position)}")
             elif txt.startswith("convertpreset"):
                 await saveconfig(user_id, 'convert', 'preset', new_position, SAVE_TO_DATABASE)
                 await event.answer(f"✅Convert Preset - {str(new_position)}")
@@ -635,6 +643,7 @@ async def convert_callback(event, txt, user_id, edit):
                 await saveconfig(user_id, 'convert', 'convert_list', eval(new_position), SAVE_TO_DATABASE)
                 await event.answer(f"✅Convert Qualities - {str(new_position)}")
             convert_encoder = get_data()[user_id]['convert']['encoder']
+            convert_encode = get_data()[user_id]['convert']['encode']
             convert_preset = get_data()[user_id]['convert']['preset']
             convert_crf = get_data()[user_id]['convert']['crf']
             convert_map = get_data()[user_id]['convert']['map']
@@ -643,6 +652,9 @@ async def convert_callback(event, txt, user_id, edit):
             convert_queue_size = get_data()[user_id]['convert']['queue_size']
             convert_sync = get_data()[user_id]['convert']['sync']
             convert_list = get_data()[user_id]['convert']['convert_list']
+            KeyBoard.append([Button.inline(f'🎧Use Encoder - {str(convert_encode)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, convert_encode, "convertencode", 2, False):
+                KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🍬Encoder - {str(convert_encoder)}', 'nik66bots')])
             for board in gen_keyboard(encoders_list, convert_encoder, "convertencoder", 2, False):
                 KeyBoard.append(board)
@@ -690,9 +702,9 @@ async def hardmux_callback(event, txt, user_id, edit):
             if txt.startswith("hardmuxencoder"):
                 await saveconfig(user_id, 'hardmux', 'encoder', new_position, SAVE_TO_DATABASE)
                 await event.answer(f"✅Hardmux Encoder - {str(new_position)}")
-            elif txt.startswith("hardmuxencode"):
-                await saveconfig(user_id, 'hardmux', 'encode', new_position, SAVE_TO_DATABASE)
-                await event.answer(f"✅Hardmux Encode Video - {str(new_position)}")
+            elif txt.startswith("hardmuxencodevideo"):
+                await saveconfig(user_id, 'hardmux', 'encode_video', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Use Encoder - {str(new_position)}")
             elif txt.startswith("hardmuxpreset"):
                 await saveconfig(user_id, 'hardmux', 'preset', new_position, SAVE_TO_DATABASE)
                 await event.answer(f"✅Hardmux Preset - {str(new_position)}")
@@ -705,18 +717,25 @@ async def hardmux_callback(event, txt, user_id, edit):
             elif txt.startswith("hardmuxsync"):
                 await saveconfig(user_id, 'hardmux', 'sync', eval(new_position), SAVE_TO_DATABASE)
                 await event.answer(f"✅Hardmux Use SYNC - {str(new_position)}")
-            hardmux_encode = get_data()[user_id]['hardmux']['encode']
+            elif txt.startswith("hardmuxcopysub"):
+                await saveconfig(user_id, 'hardmux', 'copy_sub', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Copy Subtitles - {str(new_position)}")
+            hardmux_encode_video = get_data()[user_id]['hardmux']['encode_video']
             hardmux_encoder = get_data()[user_id]['hardmux']['encoder']
             hardmux_preset = get_data()[user_id]['hardmux']['preset']
             hardmux_crf = get_data()[user_id]['hardmux']['crf']
             hardmux_use_queue_size = get_data()[user_id]['hardmux']['use_queue_size']
             hardmux_queue_size = get_data()[user_id]['hardmux']['queue_size']
             hardmux_sync = get_data()[user_id]['hardmux']['sync']
-            KeyBoard.append([Button.inline(f'🎼Encode Video - {str(hardmux_encode)}', 'nik66bots')])
-            for board in gen_keyboard(bool_list, hardmux_encode, "hardmuxencode", 2, False):
+            hardmux_copysub = get_data()[user_id]['hardmux']['copy_sub']
+            KeyBoard.append([Button.inline(f'🎧Use Encoder - {str(hardmux_encode_video)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, hardmux_encode_video, "hardmuxencodevideo", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🍬Encoder - {str(hardmux_encoder)}', 'nik66bots')])
             for board in gen_keyboard(encoders_list, hardmux_encoder, "hardmuxencoder", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🍄Copy Subtitles - {str(hardmux_copysub)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, hardmux_copysub, "hardmuxcopysub", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'📻Use FFMPEG Queue Size  - {str(hardmux_use_queue_size)}', 'nik66bots')])
             if hardmux_use_queue_size:

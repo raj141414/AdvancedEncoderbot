@@ -611,7 +611,7 @@ async def _settings(event):
         [Button.inline('🛺 Watermark', 'watermark_settings')],
         [Button.inline('🍧 Merge', 'merge_settings')],
         [Button.inline('🚜 Convert', 'convert_settings')],
-        [Button.inline('🚍 HardMux', 'convert_settings')],
+        [Button.inline('🚍 HardMux', 'hardmux_settings')],
         [Button.inline('⭕Close Settings', 'close_settings')]
     ])
         return

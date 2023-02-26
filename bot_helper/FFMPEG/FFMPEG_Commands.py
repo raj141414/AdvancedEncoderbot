@@ -208,6 +208,7 @@ def get_commands(process_status):
             convert_encoder = get_data()[process_status.user_id]['convert']['encoder']
             convert_copysub = get_data()[process_status.user_id]['convert']['copy_sub']
             convert_sync = get_data()[process_status.user_id]['convert']['sync']
+            convert_encode = get_data()[process_status.user_id]['convert']['encode']
             create_direc(f"{process_status.dir}/convert/")
             log_file = f"{process_status.dir}/convert/convert_logs_{process_status.process_id}.txt"
             if exists(log_file):
@@ -225,10 +226,13 @@ def get_commands(process_status):
                                             "-map", "0:s?"]
             if convert_copysub:
                 command+= ["-c:s", "copy"]
-            if convert_encoder=='libx265':
-                    command+= ['-vcodec','libx265','-vtag', 'hvc1']
+            if convert_encode:
+                if convert_encoder=='libx265':
+                        command+= ['-vcodec','libx265','-vtag', 'hvc1']
+                else:
+                        command+= ['-vcodec','libx264']
             else:
-                    command+= ['-vcodec','libx264']
+                command+= ["-c:a", "copy"]
             convert_use_queue_size = get_data()[process_status.user_id]['convert']['use_queue_size']
             if convert_use_queue_size:
                 convert_queue_size = get_data()[process_status.user_id]['convert']['queue_size']
@@ -242,7 +246,8 @@ def get_commands(process_status):
     elif process_status.process_type==Names.hardmux:
         hardmux_preset =  get_data()[process_status.user_id]['hardmux']['preset']
         hardmux_crf = get_data()[process_status.user_id]['hardmux']['crf']
-        hardmux_encode = get_data()[process_status.user_id]['hardmux']['encode']
+        hardmux_encode_video = get_data()[process_status.user_id]['hardmux']['encode_video']
+        hardmux_copysub = get_data()[process_status.user_id]['hardmux']['copy_sub']
         create_direc(f"{process_status.dir}/hardmux/")
         log_file = f"{process_status.dir}/hardmux/hardmux_logs_{process_status.process_id}.txt"
         input_file = f'{str(process_status.send_files[-1])}'
@@ -253,7 +258,9 @@ def get_commands(process_status):
         command+= ['-vf', f"subtitles='{sub_loc}'",
                                     '-map','0:v',
                                     '-map',f'{str(process_status.amap_options)}']
-        if hardmux_encode:
+        if hardmux_copysub:
+            command+= ["-c:s", "copy"]
+        if hardmux_encode_video:
                 encoder = get_data()[process_status.user_id]['hardmux']['encoder']
                 if encoder=='libx265':
                         command += ['-vcodec','libx265', '-vtag', 'hvc1', '-crf', f'{str(hardmux_crf)}', '-preset', hardmux_preset]
