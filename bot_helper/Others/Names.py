@@ -5,13 +5,14 @@ class Names:
     softmux = "SoftMux"
     softremux = "SoftReMux"
     convert = "Convert"
+    hardmux = "Hardmux"
     aria = "Aria"
     ffmpeg = "FFMPEG"
     telethon = "Telethon"
     pyrogram = "Pyrogram"
     rclone = "Rclone"
-    STATUS = {compress: "🏮Compressing", watermark: "🛺Adding Watermark", merge: "🍧Merging", softmux: "🎮SoftMuxing Subtitles", softremux: "🛩SoftReMuxing Subtitles", convert: "🚜Converting Video"}
-    FFMPEG_PROCESSES = [compress, watermark, merge, softmux, softremux, convert]
+    STATUS = {compress: "🏮Compressing", watermark: "🛺Adding Watermark", merge: "🍧Merging", softmux: "🎮SoftMuxing Subtitles", softremux: "🛩SoftReMuxing Subtitles", convert: "🚜Converting Video", hardmux: "🚍HardMuxing Subtitle"}
+    FFMPEG_PROCESSES = [compress, watermark, merge, softmux, softremux, convert, hardmux]
     STATUS_UPLOADING = "🔼Uploading"
     STATUS_CLONING= "🧬Cloning"
     STATUS_DOWNLOADING = "🔽Downloading"

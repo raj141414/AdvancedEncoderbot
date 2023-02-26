@@ -75,6 +75,14 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['softremux']['map'] = False
         DATA[user_id]['softremux']['encode'] = False
         DATA[user_id]['softremux']['encoder'] = 'libx265'
+        DATA[user_id]['hardmux'] = {}
+        DATA[user_id]['hardmux']['preset'] = 'ultrafast'
+        DATA[user_id]['hardmux']['crf'] = '23'
+        DATA[user_id]['hardmux']['encode'] = False
+        DATA[user_id]['hardmux']['encoder'] = 'libx265'
+        DATA[user_id]['hardmux']['use_queue_size'] = False
+        DATA[user_id]['hardmux']['queue_size'] = '9999'
+        DATA[user_id]['hardmux']['sync'] = False
         DATA[user_id]['compress'] = {}
         DATA[user_id]['compress']['preset'] = 'ultrafast'
         DATA[user_id]['compress']['crf'] = '23'

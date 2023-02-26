@@ -43,6 +43,7 @@ async def callback(event):
             [Button.inline('🛺 Watermark', 'watermark_settings')],
             [Button.inline('🍧 Merge', 'merge_settings')],
             [Button.inline('🚜 Convert', 'convert_settings')],
+            [Button.inline('🚍 HardMux', 'convert_settings')],
             [Button.inline('⭕Close Settings', 'close_settings')]
         ])
             return
@@ -134,6 +135,12 @@ async def callback(event):
                     elif txt=="change_watermark_queue_size":
                         await saveconfig(user_id, 'watermark', 'queue_size', str(queue_size), SAVE_TO_DATABASE)
                         await watermark_callback(event, "watermark_settings", user_id, False)
+                    elif txt=="change_convert_queue_size":
+                        await saveconfig(user_id, 'convert', 'queue_size', str(queue_size), SAVE_TO_DATABASE)
+                        await convert_callback(event, "convert_settings", user_id, False)
+                    elif txt=="change_hardmux_queue_size":
+                        await saveconfig(user_id, 'hardmux', 'queue_size', str(queue_size), SAVE_TO_DATABASE)
+                        await hardmux_callback(event, "hardmux_settings", user_id, False)
             return
         
         
@@ -674,4 +681,67 @@ async def convert_callback(event, txt, user_id, edit):
                 except:
                     pass
                 await Telegram.TELETHON_CLIENT.send_message(event.chat.id, "⚙ Convert Settings", buttons=KeyBoard)
+            return
+
+###############------Hardmux------###############
+async def hardmux_callback(event, txt, user_id, edit):
+            new_position = txt.split("_", 1)[1]
+            KeyBoard = []
+            if txt.startswith("hardmuxencoder"):
+                await saveconfig(user_id, 'hardmux', 'encoder', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Encoder - {str(new_position)}")
+            elif txt.startswith("hardmuxencode"):
+                await saveconfig(user_id, 'hardmux', 'encode', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Encode Video - {str(new_position)}")
+            elif txt.startswith("hardmuxpreset"):
+                await saveconfig(user_id, 'hardmux', 'preset', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Preset - {str(new_position)}")
+            elif txt.startswith("hardmuxcrf"):
+                await saveconfig(user_id, 'hardmux', 'crf', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux CRF - {str(new_position)}")
+            elif txt.startswith("hardmuxusequeuesize"):
+                await saveconfig(user_id, 'hardmux', 'use_queue_size', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Use Queue Size - {str(new_position)}")
+            elif txt.startswith("hardmuxsync"):
+                await saveconfig(user_id, 'hardmux', 'sync', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Hardmux Use SYNC - {str(new_position)}")
+            hardmux_encode = get_data()[user_id]['hardmux']['encode']
+            hardmux_encoder = get_data()[user_id]['hardmux']['encoder']
+            hardmux_preset = get_data()[user_id]['hardmux']['preset']
+            hardmux_crf = get_data()[user_id]['hardmux']['crf']
+            hardmux_use_queue_size = get_data()[user_id]['hardmux']['use_queue_size']
+            hardmux_queue_size = get_data()[user_id]['hardmux']['queue_size']
+            hardmux_sync = get_data()[user_id]['hardmux']['sync']
+            KeyBoard.append([Button.inline(f'🎼Encode Video - {str(hardmux_encode)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, hardmux_encode, "hardmuxencode", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🍬Encoder - {str(hardmux_encoder)}', 'nik66bots')])
+            for board in gen_keyboard(encoders_list, hardmux_encoder, "hardmuxencoder", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'📻Use FFMPEG Queue Size  - {str(hardmux_use_queue_size)}', 'nik66bots')])
+            if hardmux_use_queue_size:
+                KeyBoard.append([Button.inline(f'🎹FFMPEG Queue Size Value  - {str(hardmux_queue_size)} (Click To Change)', 'change_hardmux_queue_size')])
+            for board in gen_keyboard(bool_list, hardmux_use_queue_size, "hardmuxusequeuesize", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'🌳Use SYNC - {str(hardmux_sync)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, hardmux_sync, "hardmuxsync", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'♒Preset - {str(hardmux_preset)}', 'nik66bots')])
+            for board in gen_keyboard(presets_list, hardmux_preset, "hardmuxpreset", 3, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'⚡CRF  - {str(hardmux_crf)}', 'nik66bots')])
+            for board in gen_keyboard(crf_list, hardmux_crf, "hardmuxcrf", 6, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'↩Back', 'settings')])
+            if edit:
+                try:
+                    await event.edit("⚙ Hardmux Settings", buttons=KeyBoard)
+                except:
+                    pass
+            else:
+                try:
+                    await event.delete()
+                except:
+                    pass
+                await Telegram.TELETHON_CLIENT.send_message(event.chat.id, "⚙ Hardmux Settings", buttons=KeyBoard)
             return

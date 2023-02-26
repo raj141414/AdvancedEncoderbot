@@ -157,6 +157,15 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['convert']['map']}\n"\
                         f"**Encoder**: {get_data()[user_id]['convert']['encoder']} | **C.Qualities**: {get_data()[user_id]['convert']['convert_list']}"
                 return text
+        elif pmode==Names.hardmux:
+                if get_data()[user_id]['hardmux']['use_queue_size']:
+                        qsize_text = f"**Queue Size**: {str(get_data()[user_id]['hardmux']['queue_size'])}"
+                else:
+                        qsize_text = f"**Queue Size**: False"
+                text = f"\n**SYNC**: {get_data()[user_id]['hardmux']['sync']} | **Preset**: {get_data()[user_id]['hardmux']['preset']}\n"\
+                        f"**CRF**: {get_data()[user_id]['hardmux']['crf']} | {qsize_text}\n"\
+                        f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode']}"
+                return text
         else:
                 return False
 

@@ -126,7 +126,7 @@ def get_commands(process_status):
                 command+= ["-c", "copy"]
             command+= ['-y', f'{str(output_file)}']
             return command, log_file, input_file, output_file, file_duration
-        
+
     elif process_status.process_type==Names.softmux:
         softmux_preset =  get_data()[process_status.user_id]['softmux']['preset']
         softmux_crf = get_data()[process_status.user_id]['softmux']['crf']
@@ -237,3 +237,36 @@ def get_commands(process_status):
                 command+= ['-vsync', '1', '-async', '-1']
             command+= ['-preset', convert_preset, '-crf', f'{str(convert_crf)}', '-y', f"{output_file}"]
             return command, log_file, input_file, output_file, file_duration
+    
+    
+    elif process_status.process_type==Names.hardmux:
+        hardmux_preset =  get_data()[process_status.user_id]['hardmux']['preset']
+        hardmux_crf = get_data()[process_status.user_id]['hardmux']['crf']
+        hardmux_encode = get_data()[process_status.user_id]['hardmux']['encode']
+        create_direc(f"{process_status.dir}/hardmux/")
+        log_file = f"{process_status.dir}/hardmux/hardmux_logs_{process_status.process_id}.txt"
+        input_file = f'{str(process_status.send_files[-1])}'
+        output_file = f"{process_status.dir}/hardmux/{get_output_name(process_status)}"
+        file_duration = get_video_duration(input_file)
+        sub_loc = process_status.subtitles[-1]
+        command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
+        command+= ['-vf', f"subtitles='{sub_loc}'",
+                                    '-map','0:v',
+                                    '-map',f'{str(process_status.amap_options)}']
+        if hardmux_encode:
+                encoder = get_data()[process_status.user_id]['hardmux']['encoder']
+                if encoder=='libx265':
+                        command += ['-vcodec','libx265', '-vtag', 'hvc1', '-crf', f'{str(hardmux_crf)}', '-preset', hardmux_preset]
+                else:
+                        command += ['-vcodec','libx264', '-crf', f'{str(hardmux_crf)}', '-preset', hardmux_preset]
+        else:
+                command += ['-c:a','copy']
+        hardmux_sync = get_data()[process_status.user_id]['hardmux']['sync']
+        hardmux_use_queue_size = get_data()[process_status.user_id]['hardmux']['use_queue_size']
+        if hardmux_use_queue_size:
+                hardmux_queue_size = get_data()[process_status.user_id]['hardmux']['queue_size']
+                command+= ['-max_muxing_queue_size', f'{str(hardmux_queue_size)}']
+        if hardmux_sync:
+            command+= ['-vsync', '1', '-async', '-1']
+        command += ["-y", output_file]
+        return command, log_file, input_file, output_file, file_duration
