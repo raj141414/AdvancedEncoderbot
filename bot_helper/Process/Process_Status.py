@@ -164,7 +164,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
 
 
 class ProcessStatus:
-        def __init__(self, user_id, chat_id, user_name, user_first_name, event, process_type, file_name=False, thumbnail=False, start_time=False, generate_sample_video=True, generate_screenshoots=True):
+        def __init__(self, user_id, chat_id, user_name, user_first_name, event, process_type, file_name=False, thumbnail=False, start_time=False):
                 self.user_id = user_id
                 self.chat_id = chat_id
                 self.amap_options =  '0:a'
@@ -185,8 +185,6 @@ class ProcessStatus:
                 self.thumbnail = thumbnail
                 self.process_type = process_type
                 self.start_time = start_time
-                self.generate_screenshoots = generate_screenshoots
-                self.generate_sample_video = generate_sample_video
                 self.convert_quality = 480
                 self.convert_index = "-/-"
                 if self.user_name:
