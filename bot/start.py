@@ -683,6 +683,9 @@ async def _merge_videos(event):
             elif new_event=="cancelled":
                 Cancel = True
                 break
+            elif not new_event:
+                Cancel = True
+                break
         if Cancel:
             del process_status
             return
@@ -739,6 +742,9 @@ async def _softmux_subtitles(event):
             elif new_event=="stopped":
                 break
             elif new_event=="cancelled":
+                Cancel = True
+                break
+            elif not new_event:
                 Cancel = True
                 break
         if Cancel:
@@ -803,6 +809,9 @@ async def _softremux_subtitles(event):
             elif new_event=="stopped":
                 break
             elif new_event=="cancelled":
+                Cancel = True
+                break
+            elif not new_event:
                 Cancel = True
                 break
         if Cancel:
