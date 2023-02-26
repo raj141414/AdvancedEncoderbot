@@ -207,9 +207,9 @@ async def start_task(task):
                             process_completed = True
     if process_completed:
         await upload_files(process_status)
-        if process_status.generate_sample_video:
+        if process_status.generate_sample_video and check_running_process(process_status.process_id):
                 await FFMPEG.gen_sample_video(process_status)
-        if process_status.generate_screenshoots:
+        if process_status.generate_screenshoots and check_running_process(process_status.process_id):
                 await FFMPEG.generate_ss(process_status)
     await clear_trash(task, trash_objects)
     await task_manager()
