@@ -2,7 +2,7 @@
 
 
 ### Configuration
-To configure this bot add the environment variables stated below. Or add them in [sample_config.env](./sample_config.env) and change the name to `config.env`.
+To configure this bot add the environment variables stated below. Or add them in [sample_config.env](./sample_config.env) and change the name to `config.env`. Or add the environment variable `CONFIG_FILE_URL` and put config.env direct url in it.
 - `API_ID` - (Required)Get it by creating an app on [https://my.telegram.org](https://my.telegram.org)
 - `API_HASH` - (Required)Get it by creating an app on [https://my.telegram.org](https://my.telegram.org)
 - `TOKEN` - (Required)Get it by creating a bot on [https://t.me/BotFather](https://t.me/BotFather)
