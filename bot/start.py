@@ -721,7 +721,7 @@ async def _softmux_subtitles(event):
         file_index = 1
         Cancel = False
         while True:
-            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softmux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process SoftMux\n🔷Send `cancel` To Cancel SoftMux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softmux", "stop", "cancel"], f"Send Subtitle SRT File No {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process SoftMux\n🔷Send `cancel` To Cancel SoftMux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
             if new_event and new_event not in ["cancelled", "stopped", "pass"]:
                 if new_event.message.file:
                     if not str(new_event.message.file.mime_type).startswith("video/") and not str(new_event.message.file.mime_type).startswith("image/"):
@@ -788,7 +788,7 @@ async def _softremux_subtitles(event):
         file_index = 1
         Cancel = False
         while True:
-            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softremux", "stop", "cancel"], f"Send Subtitle SRT File {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process softremux\n🔷Send `cancel` To Cancel softremux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/softremux", "stop", "cancel"], f"Send Subtitle SRT File No {file_index}", 120, False, False, message_hint=f"🔷Send `stop` To Process Softremux\n🔷Send `cancel` To Cancel Softremux Process", allow_command=True, allow_magnet=False, allow_url=False, stop_on_url=False)
             if new_event and new_event not in ["cancelled", "stopped", "pass"]:
                 if new_event.message.file:
                     if not str(new_event.message.file.mime_type).startswith("video/") and not str(new_event.message.file.mime_type).startswith("image/"):
