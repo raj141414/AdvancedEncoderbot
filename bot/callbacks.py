@@ -717,9 +717,6 @@ async def hardmux_callback(event, txt, user_id, edit):
             elif txt.startswith("hardmuxsync"):
                 await saveconfig(user_id, 'hardmux', 'sync', eval(new_position), SAVE_TO_DATABASE)
                 await event.answer(f"✅Hardmux Use SYNC - {str(new_position)}")
-            elif txt.startswith("hardmuxcopysub"):
-                await saveconfig(user_id, 'hardmux', 'copy_sub', eval(new_position), SAVE_TO_DATABASE)
-                await event.answer(f"✅Hardmux Copy Subtitles - {str(new_position)}")
             hardmux_encode_video = get_data()[user_id]['hardmux']['encode_video']
             hardmux_encoder = get_data()[user_id]['hardmux']['encoder']
             hardmux_preset = get_data()[user_id]['hardmux']['preset']
@@ -727,15 +724,11 @@ async def hardmux_callback(event, txt, user_id, edit):
             hardmux_use_queue_size = get_data()[user_id]['hardmux']['use_queue_size']
             hardmux_queue_size = get_data()[user_id]['hardmux']['queue_size']
             hardmux_sync = get_data()[user_id]['hardmux']['sync']
-            hardmux_copysub = get_data()[user_id]['hardmux']['copy_sub']
             KeyBoard.append([Button.inline(f'🎧Use Encoder - {str(hardmux_encode_video)}', 'nik66bots')])
             for board in gen_keyboard(bool_list, hardmux_encode_video, "hardmuxencodevideo", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🍬Encoder - {str(hardmux_encoder)}', 'nik66bots')])
             for board in gen_keyboard(encoders_list, hardmux_encoder, "hardmuxencoder", 2, False):
-                KeyBoard.append(board)
-            KeyBoard.append([Button.inline(f'🍄Copy Subtitles - {str(hardmux_copysub)}', 'nik66bots')])
-            for board in gen_keyboard(bool_list, hardmux_copysub, "hardmuxcopysub", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'📻Use FFMPEG Queue Size  - {str(hardmux_use_queue_size)}', 'nik66bots')])
             if hardmux_use_queue_size:
