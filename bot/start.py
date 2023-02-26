@@ -162,7 +162,7 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type):
             try:
                 new_event = await handle
             except Exception as e:
-                await ask.reply('🔃Timed Out! Tasked Has Been Cancelled.')
+                await ask.reply('🔃Timed Out! Task Has Been Cancelled.')
                 LOGGER.info(e)
                 return False
             try:
@@ -182,8 +182,7 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
             try:
                 new_event = await handle
             except Exception as e:
-                await ask.reply('🔃Timed Out! Tasked Has Been Cancelled.')
-                LOGGER.info(str(e))
+                await ask.reply('🔃Timed Out! Task Has Been Cancelled.')
                 return False
             if new_event.message.file:
                 if mtype:
