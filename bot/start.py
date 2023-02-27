@@ -3,7 +3,7 @@ from telethon import events, Button
 from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time, get_env_keys, export_env_file, get_env_dict
 from os.path import exists
 from asyncio import sleep as asynciosleep
-from os import execl, makedirs
+from os import execl, makedirs, remove
 from os.path import isdir, isfile
 from sys import argv, executable
 from bot_helper.Aria2.Aria2_Engine import Aria2, getDownloadByGid
@@ -936,8 +936,8 @@ async def _hardmux_subtitle(event):
         return
 
 ###############------Change_Config------###############
-@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/changeconfigs', func=lambda e: owner_checker(e)))
-async def _changeconfigs(event):
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/changeconfig', func=lambda e: owner_checker(e)))
+async def _changeconfig(event):
         if not exists('config.env'):
             await event.reply("❗`config.env` File Not Found")
             return
@@ -951,6 +951,23 @@ async def _changeconfigs(event):
             await event.reply("❗No Variable In `config.env` File")
         return
 
+###############------Clear_Config------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/clearconfigs', func=lambda e: owner_checker(e)))
+async def _clearconfig(event):
+        if exists('botconfig.env'):
+            remove("botconfig.env")
+            await event.reply(f"✅Successfully Cleared")
+        else:
+            await event.reply(f"❗Config Not Found")
+        return
+
+###############------Check_Sudo------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/checksudo', func=lambda e: owner_checker(e)))
+async def _checksudo(event):
+    await event.reply(str(sudo_users))
+    return
+    
+
 ###############------Add_Sudo------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/addsudo', func=lambda e: owner_checker(e)))
 async def _addsudo(event):
@@ -961,17 +978,53 @@ async def _addsudo(event):
         sudo_id = await ask_text(chat_id, user_id, event, 120, "Send User ID", int)
         if not sudo_id:
             return
-    sudo_users.append(sudo_id)
-    if exists("botconfig.env"):
-        config_dict = get_env_dict('botconfig.env')
-    elif exists("config.env"):
-        config_dict = get_env_dict('config.env')
+    if sudo_id not in sudo_users:
+            sudo_users.append(sudo_id)
+            if exists("botconfig.env"):
+                config_dict = get_env_dict('botconfig.env')
+            elif exists("config.env"):
+                config_dict = get_env_dict('config.env')
+            else:
+                config_dict = {}
+            sudo_data = ""
+            for u in sudo_users:
+                sudo_data+= f"{u} "
+            config_dict["SUDO_USERS"] = sudo_data.strip()
+            export_env_file("botconfig.env", config_dict)
+            await event.reply(f"✅Successfully Added To Sudo Users.\n\n{str(sudo_users)}")
+            return
     else:
-        config_dict = {}
-    sudo_data = ""
-    for u in sudo_users:
-        sudo_data+= f"{u} "
-    config_dict["SUDO_USERS"] = sudo_data.strip()
-    export_env_file("botconfig.env", config_dict)
-    await event.reply(f"✅Successfully Added To Sudo Users.\n\n{str(sudo_users)}")
-    return
+        await event.reply(f"❗ID Already In Sudo Users.\n\n{str(sudo_users)}")
+        return
+
+
+###############------Delete_Sudo------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/delsudo', func=lambda e: owner_checker(e)))
+async def _delsudo(event):
+    chat_id = event.message.chat.id
+    user_id = event.message.sender.id
+    sudo_id = await get_sudo_user_id(event)
+    if not sudo_id:
+        sudo_id = await ask_text(chat_id, user_id, event, 120, "Send User ID", int)
+        if not sudo_id:
+            return
+    if sudo_id in sudo_users:
+            sudo_users.remove(sudo_id)
+            if exists("botconfig.env"):
+                config_dict = get_env_dict('botconfig.env')
+            elif exists("config.env"):
+                config_dict = get_env_dict('config.env')
+            else:
+                config_dict = {}
+            sudo_data = ""
+            for u in sudo_users:
+                sudo_data+= f"{u} "
+            config_dict["SUDO_USERS"] = sudo_data.strip()
+            export_env_file("botconfig.env", config_dict)
+            await event.reply(f"✅Successfully Removed From Sudo Users.\n\n{str(sudo_users)}")
+            return
+    else:
+        await event.reply(f"❗ID Not Found In Sudo Users.\n\n{str(sudo_users)}")
+        return
+
+
