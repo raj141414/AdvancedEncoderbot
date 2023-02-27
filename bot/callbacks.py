@@ -73,7 +73,7 @@ async def callback(event):
                 config_dict = get_env_dict()
                 config_dict[position] = value_result.message.message
                 export_env_file("botconfig.env", config_dict)
-                await event.answer(f"✔{position} value changed successfully", alert=True)
+                await event.answer(f"✔{position} Value Changed Successfully, Restart Bot To Reflect Changes.", alert=True)
             return
         
         
