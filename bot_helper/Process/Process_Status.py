@@ -91,22 +91,21 @@ def get_progress_bar_from_percentage(percentage):
     except:
         p = 0
     p = min(max(p, 0), 100)
-    cFull = p // 6
+    cFull = p // 8
     p_str = FINISHED_PROGRESS_STR * cFull
-    p_str += UNFINISHED_PROGRESS_STR * (16 - cFull)
-    p_str = f"[{p_str}]"
-    return p_str
+    p_str += UNFINISHED_PROGRESS_STR * (12 - cFull)
+    return f"[{p_str}]"
+
 
 def get_progress_bar_string(current,total):
     completed = int(current) / 8
     total = int(total) / 8
     p = 0 if total == 0 else round(completed * 100 / total)
     p = min(max(p, 0), 100)
-    cFull = p // 6
+    cFull = p // 8
     p_str = FINISHED_PROGRESS_STR * cFull
-    p_str += UNFINISHED_PROGRESS_STR * (16 - cFull)
-    p_str = f"[{p_str}]"
-    return p_str
+    p_str += UNFINISHED_PROGRESS_STR * (12 - cFull)
+    return f"[{p_str}]"
 
 
 def ffmpeg_status_foot(status, user_id, start_time, time_in_us):

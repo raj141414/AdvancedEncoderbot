@@ -175,7 +175,8 @@ class FFMPEG:
                         process_status.update_process_message(f"🎞Generating Sample Video\n`{str(file_name)}`\n{process_status.get_task_details()}")
                         sample_name = f"{process_status.dir}/sample_{file_name}"
                         vstart_time, vend_time = await get_cut_duration(duration)
-                        cmd_sample = ["ffmpeg", "-ss", str(vstart_time), "-to",  str(vend_time), "-i", f"{input_video}","-c", "copy", '-y', f"{sample_name}"]
+                        # cmd_sample = ["ffmpeg", "-ss", str(vstart_time), "-to",  str(vend_time), "-i", f"{input_video}","-c", "copy", '-y', f"{sample_name}"]
+                        cmd_sample= ['ffmpeg', '-ss', f'{vstart_time}s', '-i', f"{input_video}", '-vframes', '1800', '-vsync', '1', '-async', '-1', '-acodec', 'copy', '-vcodec', 'copy', '-y', f"{sample_name}"]
                         sample_result = await run_process_command(cmd_sample)
                         if sample_result and exists(sample_name):
                                 try:
@@ -183,6 +184,8 @@ class FFMPEG:
                                 except Exception as e:
                                         LOGGER.info(str(e))
                                 remove(sample_name)
+                        else:
+                                await process_status.event.reply(f'❌Failed To Generate Sample Video')
         return
     ###############------Change_Metadata------###############
     async def change_metadata(process_status):
