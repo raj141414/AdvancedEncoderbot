@@ -4,7 +4,7 @@ from logging import StreamHandler, getLogger, basicConfig, ERROR, INFO
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv, dotenv_values
 from os.path import exists
-from os import system, getcwd
+from os import system, getcwd, remove
 from sys import exit
 from subprocess import run as subprocess_run
 from shutil import rmtree
@@ -76,6 +76,8 @@ class Config:
         API_ID = int(environ.get("API_ID",""))
     except:
         LOGGER.info("🔶Invalid Config")
+        if exists('botconfig.env'):
+            remove('botconfig.env')
         exit()
     API_HASH = environ.get("API_HASH","")
     TOKEN = environ.get("TOKEN","")

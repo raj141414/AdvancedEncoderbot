@@ -1,6 +1,6 @@
 from config.config import Config
 from telethon import events, Button
-from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time, get_env_keys
+from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time, get_env_keys, export_env_file, get_env_dict
 from os.path import exists
 from asyncio import sleep as asynciosleep
 from os import execl, makedirs
@@ -145,6 +145,13 @@ async def get_link(event):
             else:
                 return False, custom_file_name
 
+###############------Ask_User_ID------###############
+async def get_sudo_user_id(event):
+    if event.reply_to_msg_id:
+        reply_data = await TELETHON_CLIENT.get_messages(event.message.chat.id, ids=event.reply_to_msg_id)
+        return reply_data.from_id.user_id
+    return False
+
 
 ###############------Get_Custom_Name------###############
 async def get_custom_name(event):
@@ -168,7 +175,7 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type):
             try:
                 return text_type(new_event.message.message)
             except:
-                await new_event.reply(f'❌Invalid Limit')
+                await new_event.reply(f'❌Invalid Input')
                 return False
 
 ###############------Ask Media OR URL------###############
@@ -943,3 +950,28 @@ async def _changeconfigs(event):
         else:
             await event.reply("❗No Variable In `config.env` File")
         return
+
+###############------Add_Sudo------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/addsudo', func=lambda e: owner_checker(e)))
+async def _addsudo(event):
+    chat_id = event.message.chat.id
+    user_id = event.message.sender.id
+    sudo_id = await get_sudo_user_id(event)
+    if not sudo_id:
+        sudo_id = await ask_text(chat_id, user_id, event, 120, "Send User ID", int)
+        if not sudo_id:
+            return
+    sudo_users.append(sudo_id)
+    if exists("botconfig.env"):
+        config_dict = get_env_dict('botconfig.env')
+    elif exists("config.env"):
+        config_dict = get_env_dict('config.env')
+    else:
+        config_dict = {}
+    sudo_data = ""
+    for u in sudo_users:
+        sudo_data+= f"{u} "
+    config_dict["SUDO_USERS"] = sudo_data.strip()
+    export_env_file("botconfig.env", config_dict)
+    await event.reply(f"✅Successfully Added To Sudo Users.\n\n{str(sudo_users)}")
+    return
