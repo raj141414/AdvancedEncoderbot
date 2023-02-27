@@ -1,7 +1,7 @@
 from telethon import events
 from telethon.tl.custom import Button
 from config.config import Config
-from bot_helper.Others.Helper_Functions import delete_all, get_config
+from bot_helper.Others.Helper_Functions import delete_all, get_config, get_env_dict, export_env_file
 from bot_helper.Database.User_Data import get_data, new_user, saveconfig, saveoptions, resetdatabase
 from os.path import exists
 from bot_helper.Telegram.Telegram_Client import Telegram
@@ -67,10 +67,12 @@ async def callback(event):
         
         
         elif txt.startswith("env"):
-            position = eval(txt.split("_", 1)[1])
+            position = txt.split("_", 1)[1]
             value_result = await get_text_data(chat_id, user_id, event, 120, f"Send New Value For Variable {position}")
             if value_result:
-                Config.change_valiable(position, value_result.message.message)
+                config_dict = get_env_dict()
+                config_dict[position] = value_result.message.message
+                export_env_file("botconfig.env", config_dict)
                 await event.answer(f"✔{position} value changed successfully", alert=True)
             return
         

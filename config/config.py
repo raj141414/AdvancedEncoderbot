@@ -114,10 +114,6 @@ class Config:
     except:
         RESTART_NOTIFY_ID = False
         LOGGER.info("🔶Restart Notification ID Not Found")
-    
-    def change_valiable(variable_name, value):
-        Config.variable_name = value
-        return
 
 
 if exists(Config.DOWNLOAD_DIR):

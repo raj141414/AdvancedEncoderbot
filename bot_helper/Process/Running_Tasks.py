@@ -106,7 +106,7 @@ def get_queued_tasks_len():
 async def remove_from_working_task(process_id):
     async with working_task_lock:
         for task in working_task:
-                if task['process_status'].status_message.process_id==process_id:
+                if task['process_status'].process_id==process_id:
                     working_task.remove(task)
                     LOGGER.info(f"{process_id} Removed From Working Tasks")
                     return True
