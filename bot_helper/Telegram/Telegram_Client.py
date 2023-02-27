@@ -182,7 +182,7 @@ class Telegram:
                     if not check_running_process(process_status.process_id):
                                     await new_event.reply("🔒Task Cancelled By User")
             except Exception as e:
-                    await new_event.reply(f"❗Pyrogram Download Error: {str(e)}")
+                    await new_event.reply(f"❗Pyrogram Download Error: {str(e)}\n\nChat: {chat_id}")
                     return False
         process_status.move_dw_file(file_name)
         return True

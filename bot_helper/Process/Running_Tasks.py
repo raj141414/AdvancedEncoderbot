@@ -20,7 +20,8 @@ from os import remove
 
 async def clear_trash(task, trash_objects):
     async with working_task_lock:
-        working_task.remove(task)
+        if task in working_task:
+            working_task.remove(task)
     await remove_running_process(task['process_status'].process_id)
     try:
         rmtree(task['process_status'].dir)
@@ -100,6 +101,16 @@ async def refresh_tasks():
 
 def get_queued_tasks_len():
         return len(queued_task)
+    
+
+async def remove_from_working_task(process_id):
+    async with working_task_lock:
+        for task in working_task:
+                if task['process_status'].status_message.process_id==process_id:
+                    working_task.remove(task)
+                    LOGGER.info(f"{process_id} Removed From Working Tasks")
+                    return True
+    return False
 
 
 async def get_status_message(reply):
@@ -153,9 +164,13 @@ async def start_task(task):
             else:
                 process_status.move_dw_file(aria2_status.name())
         else:
-            download = await Telegram.download_tg_file(process_status, task['functions'][i][1], dw_index)
-            if not download:
-                break
+            try:
+                download = await Telegram.download_tg_file(process_status, task['functions'][i][1], dw_index)
+                if not download:
+                    break
+            except Exception as e:
+                    LOGGER.info(str(e))
+                    break
         if not check_running_process(process_status.process_id):
             break
         if i==loop_range-1:

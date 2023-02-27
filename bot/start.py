@@ -12,7 +12,7 @@ from time import time
 from asyncio import create_task
 from bot_helper.Database.User_Data import get_data, new_user, change_task_limit, get_task_limit, saveoptions, save_restart, get_host_stats
 from bot_helper.Telegram.Telegram_Client import Telegram
-from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_user_id, get_queued_tasks_len, refresh_tasks
+from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_user_id, get_queued_tasks_len, refresh_tasks, remove_from_working_task
 from bot_helper.Process.Running_Process import remove_running_process
 from asyncio import Lock
 from psutil import virtual_memory, cpu_percent, disk_usage
@@ -504,6 +504,7 @@ async def _cancel(event):
                             if add_user_id:
                                 if add_user_id==user_id or sudo_user_checker_id(user_id):
                                     cancel_result = await remove_running_process(process_id)
+                                    await remove_from_working_task(process_id)
                                     if not cancel_result:
                                             await event.reply(f'❗No process with this id')
                                             return
