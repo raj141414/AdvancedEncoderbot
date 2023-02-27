@@ -1,8 +1,8 @@
-from os import getenv
+from os import environ
 from pymongo import MongoClient
 from logging import StreamHandler, getLogger, basicConfig, ERROR, INFO
 from logging.handlers import RotatingFileHandler
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values
 from os.path import exists
 from os import system, getcwd
 from sys import exit
@@ -36,23 +36,20 @@ getLogger("pyrogram").setLevel(ERROR)
 LOGGER = getLogger()
 
 
-###############------Download_Config------###############
-CONFIG_FILE_URL = getenv("CONFIG_FILE_URL", False)
-if CONFIG_FILE_URL and str(CONFIG_FILE_URL).startswith("http"):
-    LOGGER.info(f"🔶Downloading Config File From URL {CONFIG_FILE_URL}")
-    system(f"wget -O config.env {str(CONFIG_FILE_URL)}")
-
-
 ###############------Import_Config------###############
-if exists('config.env'):
-    LOGGER.info(f"🔶Importing Config File")
-    load_dotenv('config.env')
-
-
-###############------Import_Bot_Config------###############
-if exists('botconfig.env'):
+if not exists('botconfig.env'):
+    CONFIG_FILE_URL = environ.get("CONFIG_FILE_URL", False)
+    if CONFIG_FILE_URL and str(CONFIG_FILE_URL).startswith("http"):
+        LOGGER.info(f"🔶Downloading Config File From URL {CONFIG_FILE_URL}")
+        system(f"wget -O config.env {str(CONFIG_FILE_URL)}")
+    if exists('config.env'):
+        LOGGER.info(f"🔶Importing Config File")
+        load_dotenv('config.env')
+else:
     LOGGER.info(f"🔶Importing Bot Config File")
-    load_dotenv('botconfig.env')
+    env_dict = dict(dotenv_values("botconfig.env"))
+    for key in env_dict:
+        environ[key] = str(env_dict[key])
 
 
 ###############------Get_Data_From_MongoDB------###############
@@ -76,31 +73,31 @@ def get_mongo_data(MONGODB_URI, BOT_USERNAME, id, colz):
 ###############------Config_Section------###############
 class Config:
     try:
-        API_ID = int(getenv("API_ID",""))
+        API_ID = int(environ.get("API_ID",""))
     except:
         LOGGER.info("🔶Invalid Config")
         exit()
-    API_HASH = getenv("API_HASH","")
-    TOKEN = getenv("TOKEN","")
+    API_HASH = environ.get("API_HASH","")
+    TOKEN = environ.get("TOKEN","")
     USE_PYROGRAM = True
-    USE_SESSION_STRING = getenv("USE_SESSION_STRING", False)
-    SESSION_STRING = getenv("SESSION_STRING","")
-    RUNNING_TASK_LIMIT = int(getenv("RUNNING_TASK_LIMIT",""))
-    FINISHED_PROGRESS_STR = getenv("FINISHED_PROGRESS_STR", '■')
-    UNFINISHED_PROGRESS_STR = getenv("UNFINISHED_PROGRESS_STR", '□')
+    USE_SESSION_STRING = environ.get("USE_SESSION_STRING", False)
+    SESSION_STRING = environ.get("SESSION_STRING","")
+    RUNNING_TASK_LIMIT = int(environ.get("RUNNING_TASK_LIMIT",""))
+    FINISHED_PROGRESS_STR = environ.get("FINISHED_PROGRESS_STR", '■')
+    UNFINISHED_PROGRESS_STR = environ.get("UNFINISHED_PROGRESS_STR", '□')
     try:
-        AUTH_GROUP_ID = int(getenv("AUTH_GROUP_ID",""))
+        AUTH_GROUP_ID = int(environ.get("AUTH_GROUP_ID",""))
     except:
         LOGGER.info("🔶Auth Group ID Not Found, Pyrogram Download and Upload Will Not Work In Group")
         AUTH_GROUP_ID = False
     NAME = "Nik66Bots"
     DOWNLOAD_DIR = f"{getcwd()}/downloads"
-    OWNER_ID = int(getenv("OWNER_ID",""))
-    SUDO_USERS = [int(x) for x in getenv("SUDO_USERS","").split(" ")]
+    OWNER_ID = int(environ.get("OWNER_ID",""))
+    SUDO_USERS = [int(x) for x in environ.get("SUDO_USERS","").split(" ")]
     ALLOWED_CHATS = SUDO_USERS.copy()
-    SAVE_TO_DATABASE = eval(getenv("SAVE_TO_DATABASE",""))
+    SAVE_TO_DATABASE = eval(environ.get("SAVE_TO_DATABASE",""))
     if SAVE_TO_DATABASE:
-        MONGODB_URI = getenv("MONGODB_URI","")
+        MONGODB_URI = environ.get("MONGODB_URI","")
         COLLECTION_NAME = "USER_DATA"
         SAVE_ID = "Nik66"
         DATA = eval(get_mongo_data(MONGODB_URI, NAME, SAVE_ID, COLLECTION_NAME))
@@ -109,7 +106,7 @@ class Config:
         DATA = {}
     LOGGER = LOGGER
     try:
-        RESTART_NOTIFY_ID = int(getenv("RESTART_NOTIFY_ID",""))
+        RESTART_NOTIFY_ID = int(environ.get("RESTART_NOTIFY_ID",""))
         LOGGER.info("🔶Restart Notification ID Found")
     except:
         RESTART_NOTIFY_ID = False
