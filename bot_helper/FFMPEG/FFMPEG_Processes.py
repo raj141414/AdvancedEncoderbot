@@ -166,8 +166,8 @@ class FFMPEG:
                 return
 
 ###############------Send_Sample_Video------###############
-    async def gen_sample_video(process_status):
-        if get_data()[process_status.user_id]['gen_sample']:
+    async def gen_sample_video(process_status, force_gen=False):
+        if get_data()[process_status.user_id]['gen_sample'] or force_gen:
                 input_video = f'{str(process_status.send_files[-1])}'
                 duration = get_video_duration(input_video)
                 if duration>60:

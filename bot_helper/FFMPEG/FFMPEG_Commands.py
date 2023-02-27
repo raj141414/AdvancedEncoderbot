@@ -44,9 +44,9 @@ def get_commands(process_status):
             if compress_copysub:
                 command+= ["-c:s", "copy"]
             if compress_encoder=='libx265':
-                    command+= ['-vcodec','libx265','-vtag', 'hvc1']
+                    command+= ['-codec:v','libx265']
             else:
-                    command+= ['-vcodec','libx264']
+                    command+= ['-codec:v','libx264']
             compress_use_queue_size = get_data()[process_status.user_id]['compress']['use_queue_size']
             if compress_use_queue_size:
                 compress_queue_size = get_data()[process_status.user_id]['compress']['queue_size']

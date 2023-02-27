@@ -230,7 +230,7 @@ async def start_task(task):
         if check_running_process(process_status.process_id):
                 await FFMPEG.generate_ss(process_status)
     if process_completed and process_status.process_type==Names.gensample:
-        await FFMPEG.gen_sample_video(process_status)
+        await FFMPEG.gen_sample_video(process_status, force_gen=True)
     await clear_trash(task, trash_objects)
     await task_manager()
     return
