@@ -11,7 +11,6 @@ from bot_helper.Process.Running_Process import check_running_process
 from bot_helper.Others.Names import Names
 from os.path import isdir, getsize
 from os import makedirs
-from asyncio import sleep
 from bot_helper.FFMPEG.FFMPEG_Processes import FFMPEG
 from bot_helper.Rclone.Rclone_Upload import upload_single_drive
 from os.path import exists
@@ -83,7 +82,6 @@ class Telegram:
                 elif file_size<=2097151000:
                         if get_data()[process_status.user_id]['tgupload']=="Telethon":
                                 try:
-                                    await sleep(2)
                                     with open(files[i], "rb") as f:
                                         uploaded_file = await upload_file(
                                             client=Telegram.TELETHON_CLIENT,
@@ -91,9 +89,7 @@ class Telegram:
                                             name=filename,
                                             check_data=process_id,
                                             progress_callback=lambda current,total: process_status.telegram_update_status(current,total, "Uploaded", filename, start_time, status, get_data()[process_status.user_id]['tgupload']))
-                                    await sleep(2)
                                     await Telegram.TELETHON_CLIENT.send_file(chat_id, file=uploaded_file, thumb=thumbnail, allow_cache=False, supports_streaming=True, caption=file_caption, reply_to=event.message, attributes=(DocumentAttributeVideo(duration, 0, 0),))
-                                    await sleep(2)
                                 except Exception as e:
                                     if str(e)!="Cancelled":
                                         await event.reply(f"❗Telethon Error While Uploading File {filename}\n\nError: {str(e)}")
@@ -114,7 +110,6 @@ class Telegram:
                 else:
                     if Telegram.TELETHON_USER_CLIENT:
                             try:
-                                await sleep(2)
                                 with open(files[i], "rb") as f:
                                     uploaded_file = await upload_file(
                                         client=Telegram.TELETHON_USER_CLIENT,
@@ -122,9 +117,7 @@ class Telegram:
                                         name=filename,
                                         check_data=process_id,
                                         progress_callback=lambda current,total: process_status.telegram_update_status(current,total, "Uploaded", filename, start_time, status, get_data()[process_status.user_id]['tgupload']))
-                                await sleep(2)
                                 await Telegram.TELETHON_USER_CLIENT.send_file(chat_id, file=uploaded_file, thumb=thumbnail, allow_cache=False, supports_streaming=True, caption=file_caption, reply_to=event.message.id, attributes=(DocumentAttributeVideo(duration, 0, 0),))
-                                await sleep(2)
                             except Exception as e:
                                 if str(e)!="Cancelled":
                                     await event.reply(f"❗Telethon User Error While Uploading File {filename}\n\nError: {str(e)}")
@@ -153,7 +146,6 @@ class Telegram:
         process_status.set_file_name(file_name)
         if get_data()[process_status.user_id]['tgdownload']=="Telethon":
                 try:
-                    await sleep(3)
                     with open(download_location, "wb") as f:
                             await download_file(
                                 client=Telegram.TELETHON_CLIENT, 
