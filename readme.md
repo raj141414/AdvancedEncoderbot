@@ -27,6 +27,7 @@ convert - Convert Video
 hardmux - Hardmux Video
 softmux - Softmux Video
 softremux - Softremux Video
+gensample - Generate Sample Video
 savewatermark - Save Watermark Image
 saveconfig - Save Rclone Config
 tasklimit - Change Task Limit
@@ -35,6 +36,11 @@ log - Get Log Message
 logs - Get Log File
 renew - Renew Storage
 resetdb - Reset Database
+changeconfig - Change Bot Config
+clearconfigs - Restore To Default Config
+addsudo - Add Sudo User
+delsudo - Delete Sudo User
+checksudo - Check Sudo Users
 time - Get Bot Uptime
 stats - Get Stats
 speedtest - SpeedTest
