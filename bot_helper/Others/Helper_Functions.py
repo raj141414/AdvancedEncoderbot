@@ -15,6 +15,7 @@ from pytz import timezone
 from string import ascii_lowercase, digits
 from random import choices
 from config.config import Config
+from dotenv import dotenv_values
 
 
 #////////////////////////////////////Variables////////////////////////////////////#
@@ -310,3 +311,28 @@ def get_value(dlist, dtype, value):
             return value
     else:
         return value
+
+
+
+###############------Get_Values_ENV_File------###############
+def get_env_dict(env_file):
+    if exists(env_file):
+        return dict(dotenv_values(env_file))
+    
+
+###############------Get_keys_List_ENV_File------###############
+def get_env_keys(env_file):
+    if exists(env_file):
+        return list(dict(dotenv_values(env_file)).keys())
+
+###############------Export_Dict_As_ENV_File------###############
+def export_env_file(env_file, env_dict):
+    env_data = ""
+    for x in env_dict:
+        env_data+= f"{x}={env_dict[x]}\n"
+    if env_data:
+        env_data = env_data.strip("\n")
+        with open(env_file, "w", encoding="utf-8") as f:
+                f.write(env_data)
+        return True
+    return False

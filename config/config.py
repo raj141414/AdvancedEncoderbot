@@ -49,6 +49,12 @@ if exists('config.env'):
     load_dotenv('config.env')
 
 
+###############------Import_Bot_Config------###############
+if exists('botconfig.env'):
+    LOGGER.info(f"🔶Importing Bot Config File")
+    load_dotenv('botconfig.env')
+
+
 ###############------Get_Data_From_MongoDB------###############
 def get_mongo_data(MONGODB_URI, BOT_USERNAME, id, colz):
         mongo_client = MongoClient(MONGODB_URI)

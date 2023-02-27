@@ -1,6 +1,6 @@
 from config.config import Config
 from telethon import events, Button
-from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time
+from bot_helper.Others.Helper_Functions import getbotuptime, get_config, delete_trash, get_logs_msg, gen_random_string, get_readable_time, get_human_size, botStartTime, get_current_time, get_env_keys
 from os.path import exists
 from asyncio import sleep as asynciosleep
 from os import execl, makedirs
@@ -926,4 +926,21 @@ async def _hardmux_subtitle(event):
             task['functions'].append(["TG", [link]])
         create_task(add_task(task))
         await update_status_message(event)
+        return
+
+###############------Change_Config------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/changeconfigs', func=lambda e: owner_checker(e)))
+async def _changeconfigs(event):
+        if not exists('config.env'):
+            await event.reply("❗`config.env` File Not Found")
+            return
+        tg_button = []
+        for key in get_env_keys('config.env'):
+            tg_button.append([Button.inline(key, f'env_{key}')])
+        if tg_button:
+            tg_button.append([Button.inline('⭕Close Settings', 'close_settings')])
+            await event.reply("Choose Variable To Change", buttons=[
+           tg_button])
+        else:
+            await event.reply("❗No Variable In `config.env` File")
         return
