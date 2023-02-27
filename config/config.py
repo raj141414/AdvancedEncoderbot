@@ -82,6 +82,11 @@ class Config:
     RUNNING_TASK_LIMIT = int(getenv("RUNNING_TASK_LIMIT",""))
     FINISHED_PROGRESS_STR = getenv("FINISHED_PROGRESS_STR", '■')
     UNFINISHED_PROGRESS_STR = getenv("UNFINISHED_PROGRESS_STR", '□')
+    try:
+        AUTH_GROUP_ID = int(getenv("AUTH_GROUP_ID",""))
+    except:
+        LOGGER.info("🔶Auth Group ID Not Found, Pyrogram Download and Upload Will Not Work In Group")
+        AUTH_GROUP_ID = False
     NAME = "Nik66Bots"
     DOWNLOAD_DIR = f"{getcwd()}/downloads"
     OWNER_ID = int(getenv("OWNER_ID",""))

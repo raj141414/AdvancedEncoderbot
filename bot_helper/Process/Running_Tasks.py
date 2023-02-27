@@ -189,7 +189,10 @@ async def start_task(task):
                             break
                     await process_status.update_status(ffmpeg_status)
                     if not check_running_process(process_status.process_id):
-                        ffmpeg_process.kill()
+                        try:
+                            ffmpeg_process.kill()
+                        except Exception as e:
+                            LOGGER.info(str(e))
                         break
                     else:
                         await ffmpeg_process.wait()

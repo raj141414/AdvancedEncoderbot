@@ -98,6 +98,8 @@ class Telegram:
                                     if str(e)!="Cancelled":
                                         await event.reply(f"❗Telethon Error While Uploading File {filename}\n\nError: {str(e)}")
                         else:
+                            if process_status.event.is_group and Config.AUTH_GROUP_ID:
+                                        chat_id = Config.AUTH_GROUP_ID
                             uploaded_file = await Telegram.PYROGRAM_CLIENT.send_video(
                                                                         chat_id=chat_id,
                                                                         file_name=filename,
@@ -168,8 +170,12 @@ class Telegram:
                         return False
         else:
             try:
+                    if process_status.event.is_group and Config.AUTH_GROUP_ID:
+                            chat_id = Config.AUTH_GROUP_ID
+                    else:
+                            chat_id = process_status.chat_id
                     await Telegram.PYROGRAM_CLIENT.download_media(
-                                                                message=(await Telegram.PYROGRAM_CLIENT.get_messages(process_status.chat_id, file_id)),
+                                                                message=(await Telegram.PYROGRAM_CLIENT.get_messages(chat_id, file_id)),
                                                                 file_name=download_location,
                                                                 progress=process_status.telegram_update_status,
                                                                 progress_args=("Downloaded", file_name, start_time, status, get_data()[process_status.user_id]['tgdownload'], Telegram.PYROGRAM_CLIENT))
