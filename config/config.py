@@ -82,7 +82,7 @@ class Config:
         exit()
     API_HASH = getenv("API_HASH","")
     TOKEN = getenv("TOKEN","")
-    USE_PYROGRAM = eval(getenv("USE_PYROGRAM",""))
+    USE_PYROGRAM = True
     USE_SESSION_STRING = getenv("USE_SESSION_STRING", False)
     SESSION_STRING = getenv("SESSION_STRING","")
     RUNNING_TASK_LIMIT = int(getenv("RUNNING_TASK_LIMIT",""))
@@ -114,6 +114,10 @@ class Config:
     except:
         RESTART_NOTIFY_ID = False
         LOGGER.info("🔶Restart Notification ID Not Found")
+    
+    def change_valiable(variable_name, value):
+        Config.variable_name = value
+        return
 
 
 if exists(Config.DOWNLOAD_DIR):

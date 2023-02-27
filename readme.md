@@ -6,6 +6,7 @@ To configure this bot add the environment variables stated below. Or add them in
 - `API_ID` - (Required)Get it by creating an app on [https://my.telegram.org](https://my.telegram.org)
 - `API_HASH` - (Required)Get it by creating an app on [https://my.telegram.org](https://my.telegram.org)
 - `TOKEN` - (Required)Get it by creating a bot on [https://t.me/BotFather](https://t.me/BotFather)
+- `OWNER_ID` - (Required)Numerical User ID of bot owner
 - `SUDO_USERS` - (Required)Numerical User IDs of sudo users separated by space.
 - `AUTH_GROUP_ID` - (Optional)Numerical chat id of group, required if you want to use pyrogram download/upload in group.
 - `RESTART_NOTIFY_ID` - (Optional)Numerical user id of user or chat id of group/channel to notify on bot start, set it False if you don't want notification on start.

@@ -66,6 +66,15 @@ async def callback(event):
             return
         
         
+        elif txt.startswith("env"):
+            position = eval(txt.split("_", 1)[1])
+            value_result = await get_text_data(chat_id, user_id, event, 120, f"Send New Value For Variable {position}")
+            if value_result:
+                Config.change_valiable(position, value_result.message.message)
+                await event.answer(f"✔{position} value changed successfully", alert=True)
+            return
+        
+        
         elif txt.startswith("renew"):
             new_position = eval(txt.split("_", 1)[1])
             if new_position:

@@ -939,8 +939,7 @@ async def _changeconfigs(event):
             tg_button.append([Button.inline(key, f'env_{key}')])
         if tg_button:
             tg_button.append([Button.inline('⭕Close Settings', 'close_settings')])
-            await event.reply("Choose Variable To Change", buttons=[
-           tg_button])
+            await event.reply("Choose Variable To Change", buttons=tg_button)
         else:
             await event.reply("❗No Variable In `config.env` File")
         return
