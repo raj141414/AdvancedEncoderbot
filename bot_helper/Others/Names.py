@@ -12,6 +12,7 @@ class Names:
     pyrogram = "Pyrogram"
     rclone = "Rclone"
     gensample = "VideoSample"
+    genss ="GenSS"
     STATUS = {compress: "🏮Compressing", 
                         watermark: "🛺Adding Watermark",
                         merge: "🍧Merging", 

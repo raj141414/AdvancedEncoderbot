@@ -144,9 +144,14 @@ class FFMPEG:
             return False
 
 ###############------Send_ScreenShots------###############
-    async def generate_ss(process_status):
-                if get_data()[process_status.user_id]['gen_ss']:
-                        ss_n0 = get_data()[process_status.user_id]['ss_no']
+    async def generate_ss(process_status, force_gen=False):
+                if get_data()[process_status.user_id]['gen_ss'] or force_gen:
+                        if not force_gen:
+                                ss_n0 = get_data()[process_status.user_id]['ss_no']
+                        else:
+                                ss_n0 = 9
+                        file_name = get_output_name(process_status)
+                        process_status.update_process_message(f"📷Generating Screenshots\n`{str(file_name)}`\n{process_status.get_task_details()}")
                         input_video = f'{str(process_status.send_files[-1])}'
                         duration = get_video_duration(input_video)
                         ss_list = await gen_ss_list(duration, ss_n0)

@@ -1058,3 +1058,34 @@ async def _gen_video_sample(event):
         create_task(add_task(task))
         await update_status_message(event)
         return
+
+###############------Generate_Screenshots------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/genss', func=lambda e: user_auth_checker(e)))
+async def _gen_screenshots(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, ["/genss", "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.genss, custom_file_name)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
+        create_task(add_task(task))
+        await update_status_message(event)
+        return
