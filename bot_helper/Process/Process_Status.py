@@ -195,6 +195,7 @@ class ProcessStatus:
                 self.start_time = start_time
                 self.convert_quality = 480
                 self.convert_index = "-/-"
+                self.ping = time()
                 if self.user_name:
                         self.added_by = f'[{self.user_first_name}](https://t.me/{str(self.user_name)})'
                 else:
@@ -312,79 +313,81 @@ class ProcessStatus:
                         ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
                 total_files = len(self.send_files)
                 while True:
-                                if status.type()==Names.aria:
-                                        if status.process_status==0:
-                                                text =f'{status.status()} [{self.dw_index}]\n'\
-                                                        f'`{str(status.name())}`\n'\
-                                                        f'{get_progress_bar_from_percentage(status.progress())} {status.progress()}\n'\
-                                                        f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
-                                                        f'**Engine**: Aria\n'\
-                                                        f'**Downloaded**: {get_human_size(int(status.processed_bytes()))} of {get_human_size(int(status.size_raw()))}\n'\
-                                                        f'**Speed**: {status.speed()} | **ETA**: {status.eta()}\n'\
-                                                        f"`/cancel aria {status.gid()}`" 
-                                                self.status_message = text
-                                                await asynciosleep(0.5)
-                                        else:
-                                                LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
-                                                break
-                                elif status.type()==Names.ffmpeg:
-                                        line = await get_ffmpeg_process_line(status.process)
-                                        if line:
-                                                line = line.decode('utf-8').strip()
-                                                status.save_log(line)
-                                                print(line)
-                                        if not check_running_process(self.process_id):
-                                                        await self.event.reply("🔒Task Cancelled By User")
-                                                        break
-                                        error_no = 0
-                                        if exists(status.log_file):
-                                                with open(status.log_file, 'r+') as file:
-                                                        text = file.read()
-                                                        time_in_us = get_value(refindall("out_time_ms=(.+)", text), int, 1)
-                                                        progress=get_value(refindall("progress=(\w+)", text), str, "error")
-                                                        speed=get_value(refindall("speed=(\d+\.?\d*)", text), float, 1)
-                                                        # bitrate = get_value(refindall("bitrate=(.+)", text), str, "0")
-                                                        # fps = get_value(refindall("fps=(.+)", text), str, "0")
-                                        else:
-                                                time_in_us = 1
-                                                progress="error"
-                                                speed=1
-                                                if progress == "end":
-                                                        break
-                                                elif progress == "error":
-                                                        if error_no == 10:
-                                                                await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
-                                                        if error_no==20:
-                                                                break
-                                                        error_no+=1
-                                                elapsed_time = time_in_us/1000000
-                                        if self.process_type==Names.convert:
-                                                        process_state = f"{Names.STATUS[self.process_type]} To {self.convert_quality}P [{self.convert_index}]"
-                                                        name = status.name
-                                        elif self.process_type!=Names.merge:
-                                                        process_state = Names.STATUS[self.process_type]
-                                                        name = status.name
-                                        else:
-                                                        process_state = f"{Names.STATUS[self.process_type]} [{total_files} Files]"
-                                                        name = str(self.file_name)
-                                        text =f'{process_state}\n'\
-                                                                f'`{name}`\n'\
-                                                                f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
-                                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
-                                                                f'**Engine**: FFMPEG'\
-                                                                f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
-                                                                f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
-                                                                f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
-                                                                f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
-                                                                f"`/cancel process {self.process_id}`"
+                        self.ping = time()
+                        if status.type()==Names.aria:
+                                if status.process_status==0:
+                                        text =f'{status.status()} [{self.dw_index}]\n'\
+                                                f'`{str(status.name())}`\n'\
+                                                f'{get_progress_bar_from_percentage(status.progress())} {status.progress()}\n'\
+                                                f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
+                                                f'**Engine**: Aria\n'\
+                                                f'**Downloaded**: {get_human_size(int(status.processed_bytes()))} of {get_human_size(int(status.size_raw()))}\n'\
+                                                f'**Speed**: {status.speed()} | **ETA**: {status.eta()}\n'\
+                                                f"`/cancel aria {status.gid()}`" 
                                         self.status_message = text
                                         await asynciosleep(0.5)
+                                else:
+                                        LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
+                                        break
+                        elif status.type()==Names.ffmpeg:
+                                line = await get_ffmpeg_process_line(status.process)
+                                if line:
+                                        line = line.decode('utf-8').strip()
+                                        status.save_log(line)
+                                        print(line)
+                                if not check_running_process(self.process_id):
+                                                await self.event.reply("🔒Task Cancelled By User")
+                                                break
+                                error_no = 0
+                                if exists(status.log_file):
+                                        with open(status.log_file, 'r+') as file:
+                                                text = file.read()
+                                                time_in_us = get_value(refindall("out_time_ms=(.+)", text), int, 1)
+                                                progress=get_value(refindall("progress=(\w+)", text), str, "error")
+                                                speed=get_value(refindall("speed=(\d+\.?\d*)", text), float, 1)
+                                                # bitrate = get_value(refindall("bitrate=(.+)", text), str, "0")
+                                                # fps = get_value(refindall("fps=(.+)", text), str, "0")
+                                else:
+                                        time_in_us = 1
+                                        progress="error"
+                                        speed=1
+                                        if progress == "end":
+                                                break
+                                        elif progress == "error":
+                                                if error_no == 10:
+                                                        await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
+                                                if error_no==20:
+                                                        break
+                                                error_no+=1
+                                        elapsed_time = time_in_us/1000000
+                                if self.process_type==Names.convert:
+                                                process_state = f"{Names.STATUS[self.process_type]} To {self.convert_quality}P [{self.convert_index}]"
+                                                name = status.name
+                                elif self.process_type!=Names.merge:
+                                                process_state = Names.STATUS[self.process_type]
+                                                name = status.name
+                                else:
+                                                process_state = f"{Names.STATUS[self.process_type]} [{total_files} Files]"
+                                                name = str(self.file_name)
+                                text =f'{process_state}\n'\
+                                                        f'`{name}`\n'\
+                                                        f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
+                                                        f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\
+                                                        f'**Engine**: FFMPEG'\
+                                                        f"{ffmpeg_head if get_data()[self.user_id]['detailed_messages'] else ''}\n"\
+                                                        f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
+                                                        f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
+                                                        f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
+                                                        f"`/cancel process {self.process_id}`"
+                                self.status_message = text
+                                await asynciosleep(0.5)
                 if status.type()==Names.aria and status.name():
                         if f"{self.dir}/{status.name()}" not in self.dw_files:
                                 self.dw_files.append(f"{self.dir}/{status.name()}")
                 return
         
         def telegram_update_status(self,current,total, mode, name, start_time, status, engine, client=False):
+                self.ping = time()
                 if client:
                         if not check_running_process(self.process_id):
                                 client.stop_transmission()
@@ -408,6 +411,7 @@ class ProcessStatus:
                 Cancel = False
                 log = []
                 while True:
+                    self.ping = time()
                     try:
                                 async for line in rclone_process.stdout:
                                         if not check_running_process(self.process_id):
@@ -451,7 +455,10 @@ class ProcessStatus:
                                 await self.event.client.send_file(self.chat_id, file=f"{self.dir}/uploaderror{str(name)}.txt", allow_cache=False, reply_to=self.event.message, caption=f"❌Error While Uploading {str(name)} To Drive")
                                 remove(f"{self.dir}/uploaderror{str(name)}.txt")
                 else:
-                        rclone_process.kill()
+                        try:
+                                rclone_process.kill()
+                        except Exception as e:
+                                LOGGER.info(str(e))
                         del log
                         return False
                 del log

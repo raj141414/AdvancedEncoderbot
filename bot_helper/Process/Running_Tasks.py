@@ -27,8 +27,9 @@ async def clear_trash(task, trash_objects):
     except:
         pass
     del task['process_status']
-    for trash in trash_objects:
-        del trash
+    if trash_objects:
+        for trash in trash_objects:
+            del trash
     del task
     return
 
@@ -52,7 +53,31 @@ working_task=[]
 working_task_lock = Lock()
 queued_task = []
 queued_task_lock = Lock()
+process_status_checker_value = 0
+process_status_checker_lock = Lock()
 
+
+async def process_status_checker():
+    async with process_status_checker_lock:
+        if process_status_checker_value==1:
+            return
+        else:
+            process_status_checker_value = 1
+    while True:
+        if len(working_task)==0 and len(queued_task)==0:
+            break
+        # try:
+        for task in working_task:
+                if time()-task['process_status'].ping>600:
+                    await task['process_status'].event.reply(f"❗Removing This Task From Working Tasks As It Is Not Responding Since Last 10 Minutes.")
+                    await clear_trash(task, False)
+                    await task_manager()
+        # except Exception as e:
+        #         LOGGER.info(str(e))
+        await sleep(60)
+    async with process_status_checker_lock:
+        process_status_checker_value = 0
+    return
 
 
 async def add_task(task):
@@ -65,6 +90,7 @@ async def add_task(task):
             async with queued_task_lock:
                 queued_task.append(task)
                 LOGGER.info(f"Add Task: Adding Task To Queue")
+    await process_status_checker()
     return
 
 
