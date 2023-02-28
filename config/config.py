@@ -85,6 +85,7 @@ class Config:
     USE_SESSION_STRING = environ.get("USE_SESSION_STRING", False)
     SESSION_STRING = environ.get("SESSION_STRING","")
     RUNNING_TASK_LIMIT = int(environ.get("RUNNING_TASK_LIMIT",""))
+    AUTO_SET_BOT_CMDS = eval(environ.get("AUTO_SET_BOT_CMDS","False"))
     FINISHED_PROGRESS_STR = environ.get("FINISHED_PROGRESS_STR", '■')
     UNFINISHED_PROGRESS_STR = environ.get("UNFINISHED_PROGRESS_STR", '□')
     try:

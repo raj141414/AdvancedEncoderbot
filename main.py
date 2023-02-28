@@ -6,6 +6,9 @@ from pathlib import Path
 from glob import glob
 from bot_helper.Aria2.Aria2_Engine import start_listener
 from bot_helper.Telegram.Telegram_Client import Telegram
+from os.path import exists
+from telethon.functions import bots
+from telethon.types import BotCommand, BotCommandScopeDefault
 
 
 #////////////////////////////////////Variables////////////////////////////////////#
@@ -36,6 +39,31 @@ for name in files:
 ###############------Get_Client_Details-----###############
 async def get_me(client):
     return await client.get_me()
+
+
+###############------Set_Bot_Commands-----###############
+def set_bot_commands(command_file):
+        LOGGER.info("🔶Setting Up Bot Commands")
+        try:
+                with open(command_file, "r", encoding="utf-8") as f:
+                        commands_data = f.read().split("-")
+                cmds = commands_data[0::2]
+                description = commands_data[1::2]
+                commands = []
+                for i in range(len(cmds)):
+                    commands.append(BotCommand(
+                                                command=cmds[i].strip(),
+                                                description=description[i].strip()
+                                            ))
+                result = Telegram.TELETHON_CLIENT(bots.SetBotCommandsRequest(
+                                            scope=BotCommandScopeDefault(),
+                                            lang_code='en',
+                                            commands=commands
+                                        ))
+                LOGGER.info(str(result))
+        except Exception as e:
+                LOGGER.info(str(e))
+        return
 
 
 ###############------Check_Restart------###############
@@ -89,6 +117,10 @@ if __name__ == "__main__":
     else:
         LOGGER.info("🔶Not Starting User Session")
     start_listener()
+    if exists("commands.txt") and Config.AUTO_SET_BOT_CMDS:
+        set_bot_commands("commands.txt")
+    else:
+        LOGGER.info("🔶Not Setting Up Bot Commands")
     LOGGER.info(f'✅@{telethob_bot.username} Started Successfully!✅')
     LOGGER.info(f"⚡Bot By Sahil Nolia⚡")
     Telegram.TELETHON_CLIENT.run_until_disconnected()
