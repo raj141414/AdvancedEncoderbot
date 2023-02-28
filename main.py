@@ -42,27 +42,25 @@ async def get_me(client):
 
 
 ###############------Set_Bot_Commands-----###############
-def set_bot_commands(command_file):
+async def set_bot_commands(command_file):
         LOGGER.info("🔶Setting Up Bot Commands")
         try:
                 with open(command_file, "r", encoding="utf-8") as f:
-                        commands_data = f.read().split("-")
-                cmds = commands_data[0::2]
-                description = commands_data[1::2]
+                            commands_data = [x.split("-") for x in f.read().split("\n")]
                 commands = []
-                for i in range(len(cmds)):
+                for i in range(len(commands_data)):
                     commands.append(BotCommand(
-                                                command=cmds[i].strip(),
-                                                description=description[i].strip()
+                                                command=commands_data[i][0].strip(),
+                                                description=commands_data[i][1].strip()
                                             ))
-                result = Telegram.TELETHON_CLIENT(bots.SetBotCommandsRequest(
+                result = await Telegram.TELETHON_CLIENT(bots.SetBotCommandsRequest(
                                             scope=BotCommandScopeDefault(),
                                             lang_code='en',
                                             commands=commands
                                         ))
-                LOGGER.info(str(result))
+                LOGGER.info(f"🔶Commands Setup Result: {str(result)}")
         except Exception as e:
-                LOGGER.info(str(e))
+                LOGGER.info(f"❗Failed To Setup Result: {str(e)}")
         return
 
 
@@ -118,7 +116,7 @@ if __name__ == "__main__":
         LOGGER.info("🔶Not Starting User Session")
     start_listener()
     if exists("commands.txt") and Config.AUTO_SET_BOT_CMDS:
-        set_bot_commands("commands.txt")
+        Telegram.TELETHON_CLIENT.loop.run_until_complete(set_bot_commands("commands.txt"))
     else:
         LOGGER.info("🔶Not Setting Up Bot Commands")
     LOGGER.info(f'✅@{telethob_bot.username} Started Successfully!✅')
