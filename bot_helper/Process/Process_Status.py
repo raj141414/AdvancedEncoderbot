@@ -351,15 +351,15 @@ class ProcessStatus:
                                         time_in_us = 1
                                         progress="error"
                                         speed=1
-                                        if progress == "end":
+                                if progress == "end":
+                                        break
+                                elif progress == "error":
+                                        if error_no == 10:
+                                                await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
+                                        if error_no==20:
                                                 break
-                                        elif progress == "error":
-                                                if error_no == 10:
-                                                        await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
-                                                if error_no==20:
-                                                        break
-                                                error_no+=1
-                                        elapsed_time = time_in_us/1000000
+                                        error_no+=1
+                                elapsed_time = time_in_us/1000000
                                 if self.process_type==Names.convert:
                                                 process_state = f"{Names.STATUS[self.process_type]} To {self.convert_quality}P [{self.convert_index}]"
                                                 name = status.name
