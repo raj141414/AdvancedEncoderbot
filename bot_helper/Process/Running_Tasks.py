@@ -53,31 +53,31 @@ working_task=[]
 working_task_lock = Lock()
 queued_task = []
 queued_task_lock = Lock()
-process_status_checker_value = 0
+process_status_checker_value = [0]
 process_status_checker_lock = Lock()
 
 
 async def process_status_checker():
     async with process_status_checker_lock:
-        if process_status_checker_value==1:
+        if process_status_checker_value[0] == 1:
             return
         else:
-            process_status_checker_value = 1
+            process_status_checker_value[0] = 1
     while True:
         if len(working_task)==0 and len(queued_task)==0:
             break
-        # try:
-        for task in working_task:
-                if time()-task['process_status'].ping>600:
-                    LOGGER.info(f"Removing {task['process_status'].process_type} Process Because Of No Response.")
-                    await task['process_status'].event.reply(f"❗Removing This Task From Working Tasks As It Is Not Responding Since Last 10 Minutes.")
-                    await clear_trash(task, False)
-                    await task_manager()
-        # except Exception as e:
-        #         LOGGER.info(str(e))
+        try:
+            for task in working_task:
+                    if time()-task['process_status'].ping>600:
+                        LOGGER.info(f"Removing {task['process_status'].process_type} Process Because Of No Response.")
+                        await task['process_status'].event.reply(f"❗Removing This Task From Working Tasks As It Is Not Responding From Last 10 Minutes.")
+                        await clear_trash(task, False)
+                        await task_manager()
+        except Exception as e:
+                LOGGER.info(str(e))
         await sleep(60)
     async with process_status_checker_lock:
-        process_status_checker_value = 0
+        process_status_checker_value[0] = 0
     return
 
 
