@@ -10,6 +10,7 @@ To configure this bot add the environment variables stated below. Or add them in
 - `SUDO_USERS` - (Required)Numerical User IDs of sudo users separated by space.
 - `AUTH_GROUP_ID` - (Optional)Numerical chat id of group, required if you want to use pyrogram download/upload in group.
 - `RESTART_NOTIFY_ID` - (Optional)Numerical user id of user or chat id of group/channel to notify on bot start, set it False if you don't want notification on start.
+- `AUTO_SET_BOT_CMDS` - (Required)Set True if you want bot to setup its commands by itself otherwise set it False.
 - `RUNNING_TASK_LIMIT` - (Required)Number Of Concurrent Tasks.
 - `UNFINISHED_PROGRESS_STR` - (Required)Unfinished progress bar string value.
 - `FINISHED_PROGRESS_STR` - (Required)Finished progress bar string value.
