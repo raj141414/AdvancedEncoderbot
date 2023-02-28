@@ -11,7 +11,7 @@ from asyncio import wait_for, create_subprocess_exec
 from asyncio.subprocess import PIPE as asyncioPIPE
 from bot_helper.Database.User_Data import get_data
 from json import loads
-from os.path import getsize, isdir, isfile
+from os.path import getsize, isdir, exists
 from shutil import move as shutil_move
 from os import makedirs, rename
 
@@ -276,12 +276,12 @@ class ProcessStatus:
                 return
         
         def move_dw_file(self, name):
-                if isfile(f"{self.dir}/{name}"):
+                if exists(f"{self.dir}/{name}"):
                         if f"{self.dir}/{name}" in self.dw_files:
                                 self.dw_files.remove(f"{self.dir}/{name}")
                                 move_dir = f"{self.dir}/work_files"
                                 create_direc(move_dir)
-                                if isfile(f"{move_dir}/{name}"):
+                                if exists(f"{move_dir}/{name}"):
                                         LOGGER.info(f"Renaming File {move_dir}/{name}")
                                         rename(f"{move_dir}/{name}", f"{move_dir}/{str(gen_random_string(5))}_{name}")
                                 LOGGER.info(f"Moving File {self.dir}/{name} To {move_dir}/{name}")
@@ -295,7 +295,7 @@ class ProcessStatus:
         
         
         def append_subtitles(self, sub_loc):
-                if isfile(sub_loc):
+                if exists(sub_loc):
                         if sub_loc not in self.subtitles:
                                 self.subtitles.append(sub_loc)
                         else:

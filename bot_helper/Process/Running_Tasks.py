@@ -9,7 +9,6 @@ from bot_helper.Others.Names import Names
 from bot_helper.FFMPEG.FFMPEG_Commands import get_commands
 from bot_helper.FFMPEG.FFMPEG_Status import FfmpegStatus
 from bot_helper.Database.User_Data import get_task_limit, get_data
-from os.path import isfile
 from time import time
 from bot_helper.FFMPEG.FFMPEG_Processes import FFMPEG
 from os.path import exists
@@ -200,7 +199,7 @@ async def start_task(task):
                     ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
                     trash_objects.append(ffmpeg_status)
                     while True:
-                        if isfile(log_file):
+                        if exists(log_file) or not check_running_process(process_status.process_id):
                             break
                     await process_status.update_status(ffmpeg_status)
                     if not check_running_process(process_status.process_id):
