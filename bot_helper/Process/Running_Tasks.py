@@ -82,7 +82,7 @@ async def process_status_checker():
             process_status_checker_value[0] = 1
             LOGGER.info(f"Starting Process Status Checker")
     while True:
-        LOGGER.info(f"Process Status Checker: Checking Processess")
+        LOGGER.info(f"Process Status Checker: Checking For Dead Processess")
         if len(working_task)==0 and len(queued_task)==0:
             LOGGER.info(f"Stopping Process Status Checker")
             break

@@ -10,7 +10,7 @@ from bot_helper.Aria2.Aria2_Engine import Aria2, getDownloadByGid
 from bot_helper.Process.Process_Status import ProcessStatus
 from time import time
 from asyncio import create_task
-from bot_helper.Database.User_Data import get_data, new_user, change_task_limit, get_task_limit, saveoptions, save_restart, get_host_stats
+from bot_helper.Database.User_Data import get_data, new_user, change_task_limit, get_task_limit, saveoptions, get_host_stats
 from bot_helper.Telegram.Telegram_Client import Telegram
 from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_user_id, get_queued_tasks_len, refresh_tasks, remove_from_working_task
 from bot_helper.Process.Running_Process import remove_running_process
@@ -476,6 +476,7 @@ async def _changetasklimit(event):
 async def _restart(event):
         chat_id = event.message.chat.id
         reply = await event.reply("♻Restarting...")
+        srun(["pkill", "-f", "aria2c|ffmpeg|rclone"])
         srun(["python3", "update.py"])
         with open(".restartmsg", "w") as f:
                 f.truncate(0)
