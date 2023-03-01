@@ -1,12 +1,12 @@
 from config.config import Config
 from sys import modules
 from importlib.util import spec_from_file_location, module_from_spec
-from bot_helper.Database.User_Data import clear_restart
 from pathlib import Path
 from glob import glob
 from bot_helper.Aria2.Aria2_Engine import start_listener
 from bot_helper.Telegram.Telegram_Client import Telegram
 from os.path import exists
+from os import remove
 from telethon.functions import bots
 from telethon.types import BotCommand, BotCommandScopeDefault
 
@@ -65,10 +65,11 @@ async def set_bot_commands(command_file):
 
 
 ###############------Check_Restart------###############
-async def check_restart():
+async def check_restart(restart_file):
     try:
-        with open(".restartmsg") as f:
+        with open(restart_file) as f:
             chat, msg_id = map(int, f)
+        remove(restart_file)
         await Telegram.TELETHON_CLIENT.edit_message(chat, msg_id, '✅Restarted Successfully')
     except Exception as e:
         LOGGER.info("🧩Error While Updating Restart Message:\n\n", e)
@@ -101,7 +102,7 @@ if __name__ == "__main__":
     telethob_bot = Telegram.TELETHON_CLIENT.loop.run_until_complete(get_me(Telegram.TELETHON_CLIENT))
     LOGGER.info("🔶Checking For Restart Notification")
     if exists(".restartmsg"):
-        Telegram.TELETHON_CLIENT.loop.run_until_complete(check_restart())
+        Telegram.TELETHON_CLIENT.loop.run_until_complete(check_restart(".restartmsg"))
     elif Config.RESTART_NOTIFY_ID:
         Telegram.TELETHON_CLIENT.loop.run_until_complete(notify_restart(Config.RESTART_NOTIFY_ID))
     if Config.USE_PYROGRAM:
