@@ -81,7 +81,6 @@ async def append_multi_task(process_status, process_name, command, event):
             del multi_process_status
             return False
     else:
-        multi_process_status.set_custom_thumbnail(process_status.thumbnail)
         process_status.append_multi_tasks(multi_process_status)
         return True
 

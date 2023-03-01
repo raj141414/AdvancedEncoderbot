@@ -25,6 +25,7 @@ async def clear_trash(task, trash_objects, multi_tasks):
                 new_process_status.move_send_files(task['process_status'].send_files)
                 multi_tasks.pop(0)
                 new_process_status.replace_multi_tasks(multi_tasks)
+                new_process_status.move_custom_thumbnail(task['process_status'].thumbnail)
                 new_task = {}
                 new_task['process_status'] = new_process_status
                 new_task['functions'] = []

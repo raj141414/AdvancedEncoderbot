@@ -242,6 +242,21 @@ class ProcessStatus:
                 self.thumbnail = thumbnail
                 return
         
+        def move_custom_thumbnail(self, thumbnail):
+                if exists(thumbnail):
+                        name = thumbnail.split("/")[-1]
+                        move_dir = f"{self.dir}/thumbnail"
+                        if exists(f"{move_dir}/{name}"):
+                                move_dir = f"{self.dir}/{str(gen_random_string(5))}"
+                        create_direc(move_dir)
+                        LOGGER.info(f"Moving Thumbnail {thumbnail} To {move_dir}/{name}")
+                        shutil_move(thumbnail, f"{move_dir}/{name}")
+                        self.thumbnail = f"{move_dir}/{name}"
+                else:
+                        self.thumbnail = "./thumb.jpg"
+                        LOGGER.info(f"{thumbnail} Thumbnail Not Found.")
+                return
+        
         def update_start_time(self, start_time):
                 self.start_time = start_time
                 return
@@ -326,7 +341,7 @@ class ProcessStatus:
                                 self.send_files.append(f"{move_dir}/{name}")
                         else:
                                 LOGGER.info(f"{file} File Not Found.")
-                        
+                        return
         
         def append_subtitles(self, sub_loc):
                 if exists(sub_loc):
