@@ -236,7 +236,7 @@ async def start_task(task):
             for c in range(ffmpeg_range):
                     if process_status.process_type==Names.convert:
                             process_status.update_convert_quality(convert_list[c])
-                            process_status.update_convert_index(f"{str(i+1)}/{str(ffmpeg_range)}")
+                            process_status.update_convert_index(f"{str(c+1)}/{str(ffmpeg_range)}")
                     command, log_file, input_file, output_file, file_duration = get_commands(process_status)
                     LOGGER.info(str(command))
                     ffmpeg_process = await create_subprocess_exec(

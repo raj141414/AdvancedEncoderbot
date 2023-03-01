@@ -669,6 +669,10 @@ async def _compress_video(event):
         if final_convert_task:
             final_multi_tasks.append(final_convert_task)
         process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return

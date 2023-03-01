@@ -206,7 +206,10 @@ class ProcessStatus:
                         
         def append_multi_tasks(self, task):
                 self.multi_tasks.append(task)
-                self.multi_task_no+=1
+                return
+        
+        def change_multi_tasks_no(self, no):
+                self.multi_task_no = no
                 return
         
         def get_multi_task_no(self):
