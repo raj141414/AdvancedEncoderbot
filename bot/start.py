@@ -99,7 +99,7 @@ async def multi_tasks(process_status, command):
     m_result = True
     chat_event = process_status.event
     while True:
-        process_text = f'[{str(q)}] Send Process Name From Below To Do With The Output From {str(p_command).replace("/", "")} Process\n\n{str(p_text)}\n🔷Send `stop` To Process Task\n🔷Send `cancel` To Cancel Task'
+        process_text = f'What To Do With The Output From **{str(p_command).replace("/", "").upper()}** Process\n🔶Multi Task No: {str(q)}\n🔶Choose From Below:\n\n {str(p_text)}\n🔷Send `stop` To Process Task\n🔷Send `cancel` To Cancel Task'
         process_ask_result = await ask_text_list(process_status.chat_id, process_status.user_id, chat_event, 120, process_text, ffmpeg_functions)
         if process_ask_result:
             if process_ask_result.message.message=="stop":
