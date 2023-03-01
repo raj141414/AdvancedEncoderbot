@@ -72,12 +72,12 @@ async def callback(event):
             position = txt.split("_", 1)[1]
             value_result = await get_text_data(chat_id, user_id, event, 120, f"Send New Value For Variable {position}")
             if value_result:
-                if exists("botconfig.env"):
-                    config_dict = get_env_dict('botconfig.env')
+                if exists(".botconfig.env"):
+                    config_dict = get_env_dict('.botconfig.env')
                 else:
                     config_dict = get_env_dict('config.env')
                 config_dict[position] = value_result.message.message
-                export_env_file("botconfig.env", config_dict)
+                export_env_file(".botconfig.env", config_dict)
                 await value_result.reply(f"✅{position} Value Changed Successfully, Restart Bot To Reflect Changes.")
             return
         

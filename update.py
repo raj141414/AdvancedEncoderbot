@@ -32,7 +32,7 @@ basicConfig(
     ],
 )
 
-if not exists('botconfig.env'):
+if not exists('.botconfig.env'):
     CONFIG_FILE_URL = environ.get("CONFIG_FILE_URL", False)
     if CONFIG_FILE_URL and str(CONFIG_FILE_URL).startswith("http"):
         log_info(f"⏺Updater: Downloading Config File From URL {CONFIG_FILE_URL}")
@@ -42,7 +42,7 @@ if not exists('botconfig.env'):
         load_dotenv('config.env')
 else:
     log_info(f"⏺Updater: Importing Bot Config File")
-    env_dict = dict(dotenv_values("botconfig.env"))
+    env_dict = dict(dotenv_values(".botconfig.env"))
     for key in env_dict:
         environ[key] = str(env_dict[key])
 
