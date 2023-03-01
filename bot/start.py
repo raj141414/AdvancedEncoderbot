@@ -627,6 +627,7 @@ async def _settings(event):
         [Button.inline('🚜 Convert', 'convert_settings')],
         [Button.inline('🚍 HardMux', 'hardmux_settings')],
         [Button.inline('🎮 SoftMux', 'softmux_settings')],
+        [Button.inline('🛩SoftReMux', 'softremux_settings')],
         [Button.inline('⭕Close Settings', 'close_settings')]
     ])
         return
