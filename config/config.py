@@ -15,9 +15,9 @@ subprocess_run(["chmod", "+x", "aria.sh"])
 subprocess_run("./aria.sh", shell=True)
 
 ###############------Logging------###############
-if exists("Logging.txt"):
-    with open("Logging.txt", "r+") as f_d:
-        f_d.truncate(0)
+# if exists("Logging.txt"):
+#     with open("Logging.txt", "r+") as f_d:
+#         f_d.truncate(0)
 
 basicConfig(
     level=INFO,

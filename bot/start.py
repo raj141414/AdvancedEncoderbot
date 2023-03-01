@@ -21,6 +21,7 @@ from telethon.errors.rpcerrorlist import MessageIdInvalidError
 from re import findall
 from requests import get
 from bot_helper.Others.SpeedTest import speedtest
+from subprocess import run as srun
 
 status_update = {}
 status_update_lock = Lock()
@@ -378,6 +379,7 @@ async def _restart(event):
                 await new_user(user_id, SAVE_TO_DATABASE)
         if SAVE_TO_DATABASE:
             await save_restart(chat_id, reply.id)
+        srun(["python3", "update.py"])
         execl(executable, executable, *argv)
 
 

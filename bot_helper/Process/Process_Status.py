@@ -196,6 +196,7 @@ class ProcessStatus:
                 self.convert_quality = 480
                 self.convert_index = "-/-"
                 self.ping = time()
+                self.trash_objects = False
                 if self.user_name:
                         self.added_by = f'[{self.user_first_name}](https://t.me/{str(self.user_name)})'
                 else:
@@ -241,8 +242,6 @@ class ProcessStatus:
                 if f"{self.dir}/{name}" not in self.send_files:
                         self.send_files.append(f"{self.dir}/{name}")
                 return
-        
-        
         
         def append_send_files_loc(self, fileloc):
                 if fileloc not in self.send_files:
