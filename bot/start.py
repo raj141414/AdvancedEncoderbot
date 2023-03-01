@@ -669,7 +669,7 @@ async def _compress_video(event):
         if final_convert_task:
             final_multi_tasks.append(final_convert_task)
         process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
         process_status.change_multi_tasks_no(final_multi_tasks_no)
         for f in final_multi_tasks:
             f.change_multi_tasks_no(final_multi_tasks_no)
@@ -782,6 +782,20 @@ async def _add_watermark_to_video(event):
                 del f
             del process_status
             return
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -836,6 +850,20 @@ async def _merge_videos(event):
                 del f
             del process_status
             return
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -912,6 +940,20 @@ async def _softmux_subtitles(event):
                 del f
             del process_status
             return
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -987,6 +1029,20 @@ async def _softremux_subtitles(event):
                 del f
             del process_status
             return
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -1089,7 +1145,20 @@ async def _hardmux_subtitle(event):
                 del f
             del process_status
             return
-        
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
+        final_multi_tasks_no = len(final_multi_tasks)+1
+        process_status.change_multi_tasks_no(final_multi_tasks_no)
+        for f in final_multi_tasks:
+            f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
