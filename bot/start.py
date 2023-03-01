@@ -27,8 +27,8 @@ status_update = {}
 status_update_lock = Lock()
 
 
-if not isdir('./botdata'):
-    makedirs("./botdata")
+if not isdir('./userdata'):
+    makedirs("./userdata")
 
 
 
@@ -1207,8 +1207,8 @@ async def _changeconfig(event):
 ###############------Clear_Config------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/clearconfigs', func=lambda e: owner_checker(e)))
 async def _clearconfig(event):
-        if exists('./botdata/botconfig.env'):
-            remove("./botdata/botconfig.env")
+        if exists('./userdata/botconfig.env'):
+            remove("./userdata/botconfig.env")
             await event.reply(f"✅Successfully Cleared")
         else:
             await event.reply(f"❗Config Not Found")
@@ -1233,8 +1233,8 @@ async def _addsudo(event):
             return
     if sudo_id not in sudo_users:
             sudo_users.append(sudo_id)
-            if exists("./botdata/botconfig.env"):
-                config_dict = get_env_dict('./botdata/botconfig.env')
+            if exists("./userdata/botconfig.env"):
+                config_dict = get_env_dict('./userdata/botconfig.env')
             elif exists("config.env"):
                 config_dict = get_env_dict('config.env')
             else:
@@ -1243,7 +1243,7 @@ async def _addsudo(event):
             for u in sudo_users:
                 sudo_data+= f"{u} "
             config_dict["SUDO_USERS"] = sudo_data.strip()
-            export_env_file("./botdata/botconfig.env", config_dict)
+            export_env_file("./userdata/botconfig.env", config_dict)
             await event.reply(f"✅Successfully Added To Sudo Users.\n\n{str(sudo_users)}")
             return
     else:
@@ -1263,8 +1263,8 @@ async def _delsudo(event):
             return
     if sudo_id in sudo_users:
             sudo_users.remove(sudo_id)
-            if exists("./botdata/botconfig.env"):
-                config_dict = get_env_dict('./botdata/botconfig.env')
+            if exists("./userdata/botconfig.env"):
+                config_dict = get_env_dict('./userdata/botconfig.env')
             elif exists("config.env"):
                 config_dict = get_env_dict('config.env')
             else:
@@ -1273,7 +1273,7 @@ async def _delsudo(event):
             for u in sudo_users:
                 sudo_data+= f"{u} "
             config_dict["SUDO_USERS"] = sudo_data.strip()
-            export_env_file("./botdata/botconfig.env", config_dict)
+            export_env_file("./userdata/botconfig.env", config_dict)
             await event.reply(f"✅Successfully Removed From Sudo Users.\n\n{str(sudo_users)}")
             return
     else:
