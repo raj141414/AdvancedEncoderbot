@@ -373,12 +373,7 @@ async def _changetasklimit(event):
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/restart', func=lambda e: owner_checker(e)))
 async def _restart(event):
         chat_id = event.message.chat.id
-        # user_id = event.message.sender.id
         reply = await event.reply("♻Restarting...")
-        # if user_id not in get_data():
-        #         await new_user(user_id, SAVE_TO_DATABASE)
-        # if SAVE_TO_DATABASE:
-        #     await save_restart(chat_id, reply.id)
         srun(["python3", "update.py"])
         with open(".restartmsg", "w") as f:
                 f.truncate(0)
