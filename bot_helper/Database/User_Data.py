@@ -128,11 +128,11 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['ffmpeg_ptime'] = True
         DATA[user_id]['auto_drive'] = False
         DATA[user_id]['show_time'] = True
-        DATA[user_id]['gen_ss'] = True
+        DATA[user_id]['gen_ss'] = False
         DATA[user_id]['ss_no'] = 5
         DATA[user_id]['gen_sample'] = False
-        DATA[user_id]['tgdownload'] = "Telethon"
-        DATA[user_id]['tgupload'] = "Telethon"
+        DATA[user_id]['tgdownload'] = "Pyrogram"
+        DATA[user_id]['tgupload'] = "Pyrogram"
         DATA[user_id]['multi_tasks'] = False
         DATA[user_id]['upload_all'] = True
         if dbsave:
