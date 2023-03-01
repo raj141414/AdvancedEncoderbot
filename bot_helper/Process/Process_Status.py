@@ -249,6 +249,8 @@ class ProcessStatus:
                 return
         
         def move_custom_thumbnail(self, thumbnail):
+                if not thumbnail:
+                        return
                 if exists(thumbnail):
                         name = thumbnail.split("/")[-1]
                         move_dir = f"{self.dir}/thumbnail"
