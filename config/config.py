@@ -37,7 +37,7 @@ LOGGER = getLogger()
 
 
 ###############------Import_Config------###############
-if not exists('.botconfig.env'):
+if not exists('.botconfig'):
     CONFIG_FILE_URL = environ.get("CONFIG_FILE_URL", False)
     if CONFIG_FILE_URL and str(CONFIG_FILE_URL).startswith("http"):
         LOGGER.info(f"🔶Downloading Config File From URL {CONFIG_FILE_URL}")
@@ -47,7 +47,7 @@ if not exists('.botconfig.env'):
         load_dotenv('config.env')
 else:
     LOGGER.info(f"🔶Importing Bot Config File")
-    env_dict = dict(dotenv_values(".botconfig.env"))
+    env_dict = dict(dotenv_values(".botconfig"))
     for key in env_dict:
         environ[key] = str(env_dict[key])
 
@@ -76,8 +76,8 @@ class Config:
         API_ID = int(environ.get("API_ID",""))
     except:
         LOGGER.info("🔶Invalid Config")
-        if exists('.botconfig.env'):
-            remove('.botconfig.env')
+        if exists('.botconfig'):
+            remove('.botconfig')
         exit()
     API_HASH = environ.get("API_HASH","")
     TOKEN = environ.get("TOKEN","")

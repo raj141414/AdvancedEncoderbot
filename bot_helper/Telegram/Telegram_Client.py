@@ -96,17 +96,20 @@ class Telegram:
                         else:
                             if process_status.event.is_group and Config.AUTH_GROUP_ID:
                                         chat_id = Config.AUTH_GROUP_ID
-                            uploaded_file = await Telegram.PYROGRAM_CLIENT.send_video(
-                                                                        chat_id=chat_id,
-                                                                        file_name=filename,
-                                                                        video=files[i],
-                                                                        caption=file_caption,
-                                                                        supports_streaming=True,
-                                                                        duration=duration,
-                                                                        thumb=thumbnail,
-                                                                        reply_to_message_id=event.message.id,
-                                                                        progress=process_status.telegram_update_status,
-                                                                        progress_args=("Uploaded", filename, start_time, status, get_data()[process_status.user_id]['tgupload'], Telegram.PYROGRAM_CLIENT))
+                            try:
+                                    uploaded_file = await Telegram.PYROGRAM_CLIENT.send_video(
+                                                                                chat_id=chat_id,
+                                                                                file_name=filename,
+                                                                                video=files[i],
+                                                                                caption=file_caption,
+                                                                                supports_streaming=True,
+                                                                                duration=duration,
+                                                                                thumb=thumbnail,
+                                                                                reply_to_message_id=event.message.id,
+                                                                                progress=process_status.telegram_update_status,
+                                                                                progress_args=("Uploaded", filename, start_time, status, get_data()[process_status.user_id]['tgupload'], Telegram.PYROGRAM_CLIENT))
+                            except Exception as e:
+                                    await event.reply(f"❗Pyrogram Upload Error: {str(e)}")
                 else:
                     if Telegram.TELETHON_USER_CLIENT:
                             try:
