@@ -181,9 +181,9 @@ class FFMPEG:
                         sample_name = f"{process_status.dir}/sample_{file_name}"
                         vstart_time, vend_time = await get_cut_duration(duration)
                         if duration<180:
-                                vframes = '900'
+                                vframes = '750'
                         else:
-                                vframes = '1800'
+                                vframes = '1500'
                         # cmd_sample = ["ffmpeg", "-ss", str(vstart_time), "-to",  str(vend_time), "-i", f"{input_video}","-c", "copy", '-y', f"{sample_name}"]
                         cmd_sample= ['ffmpeg', '-ss', f'{vstart_time}s', '-i', f"{input_video}", '-vframes', f'{vframes}', '-vsync', '1', '-async', '-1', '-acodec', 'copy', '-vcodec', 'copy', '-y', f"{sample_name}"]
                         sample_result = await run_process_command(cmd_sample)
