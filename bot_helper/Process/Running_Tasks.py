@@ -76,11 +76,15 @@ process_status_checker_lock = Lock()
 async def process_status_checker():
     async with process_status_checker_lock:
         if process_status_checker_value[0] == 1:
+            LOGGER.info(f"Process Status Checker Is Already Running")
             return
         else:
             process_status_checker_value[0] = 1
+            LOGGER.info(f"Starting Process Status Checker")
     while True:
+        LOGGER.info(f"Process Status Checker: Checking Processess")
         if len(working_task)==0 and len(queued_task)==0:
+            LOGGER.info(f"Stopping Process Status Checker")
             break
         try:
             for task in working_task:
