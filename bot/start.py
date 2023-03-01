@@ -335,6 +335,52 @@ async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, 
                             await ask.reply(f'❌You already started {str(new_event.message.message).replace("/", "")} task. Now send {str(new_event.message.message)} command again')
                             return "cancelled"
 
+###############------Ask URL------###############
+async def ask_url(event, chat_id, user_id, keywords, message, timeout, s_handle, allow_magnet=True, allow_url=True, message_hint=False, allow_command=False, stop_on_url=True):
+    async with TELETHON_CLIENT.conversation(chat_id) as conv:
+            handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: str(e.message.message) in keywords or str(e.message.message).startswith("http") or is_magnet(str(e.message.message))), timeout=timeout)
+            msg = f"*️⃣ {str(message)} [{str(timeout)} secs]"
+            if message_hint:
+                msg += f"\n\n{message_hint}"
+            ask = await event.reply(msg)
+            try:
+                new_event = await handle
+            except Exception as e:
+                await ask.reply('🔃Timed Out! Task Has Been Cancelled.')
+                return False
+            if str(new_event.message.message)=='stop':
+                    if s_handle:
+                        await ask.reply('✅Task Stopped')
+                    return "stopped"
+            elif str(new_event.message.message)=='cancel':
+                await ask.reply('✅Task Cancelled')
+                return "cancelled"
+            elif str(new_event.message.message).startswith("http"):
+                if allow_url:
+                    return new_event
+                else:
+                    await ask.reply('❌HTTP Link Are Not Allowed.')
+                    if stop_on_url:
+                        return "stopped"
+                    else:
+                        return "pass"
+            elif is_magnet(str(new_event.message.message)):
+                if allow_magnet:
+                    return new_event
+                else:
+                    await ask.reply('❌Magnet Link Are Not Allowed.')
+                    if stop_on_url:
+                        return "stopped"
+                    else:
+                        return "pass"
+            else:
+                if allow_command:
+                        await ask.reply(f'❗You have already started {str(new_event.message.message).replace("/", "")} task.')
+                        return "pass"
+                else:
+                        await ask.reply(f'❌You already started {str(new_event.message.message).replace("/", "")} task. Now send {str(new_event.message.message)} command again')
+                        return "cancelled"
+
 ###############------Get_Thumbnail------###############
 async def get_thumbnail(process_status, keywords, timeout):
     if get_data()[process_status.user_id]['custom_thumbnail']:
@@ -1338,6 +1384,38 @@ async def _gen_screenshots(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        create_task(add_task(task))
+        await update_status_message(event)
+        return
+
+###############------Leech_File------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/leech', func=lambda e: user_auth_checker(e)))
+async def _leech_file(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_url(event, chat_id, user_id, ["/leech", "stop"], "Send Link", 120, True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.leech, custom_file_name)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
+        await get_thumbnail(process_status, ["/leech", "pass"], 120)
         create_task(add_task(task))
         await update_status_message(event)
         return

@@ -13,6 +13,7 @@ class Names:
     rclone = "Rclone"
     gensample = "VideoSample"
     genss ="GenSS"
+    leech="Leech"
     STATUS = {compress: "🏮Compressing", 
                         watermark: "🛺Adding Watermark",
                         merge: "🍧Merging", 
