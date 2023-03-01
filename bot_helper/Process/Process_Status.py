@@ -165,6 +165,12 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"**CRF**: {get_data()[user_id]['hardmux']['crf']} | {qsize_text}\n"\
                         f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
                 return text
+        elif pmode==Names.softmux:
+                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softmux']['sub_codec']}"
+                return text
+        elif pmode==Names.softremux:
+                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softremux']['sub_codec']}"
+                return text
         else:
                 return ""
 

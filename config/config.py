@@ -57,7 +57,7 @@ def get_mongo_data(MONGODB_URI, BOT_USERNAME, id, colz):
         mongo_client = MongoClient(MONGODB_URI)
         mongo_db = mongo_client[BOT_USERNAME]
         col = mongo_db[colz]
-        LOGGER.info(f"🔶Getting Data From Database From MongoDB With Database Name {BOT_USERNAME} And ID  {id}")
+        LOGGER.info(f"🔶Getting Data From Database From MongoDB With Database Name {BOT_USERNAME} And ID {id}")
         item_details = col.find({"id" : id})
         data = False
         for item in item_details:
