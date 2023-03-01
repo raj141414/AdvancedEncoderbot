@@ -166,7 +166,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
                 return text
         else:
-                return False
+                return "\n"
 
 
 
