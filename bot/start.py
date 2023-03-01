@@ -84,14 +84,11 @@ async def append_multi_task(process_status, process_name, command, event):
 
 
 ###############------Multi-Tasks------###############
-async def multi_tasks(process_status, command, base_process):
+async def multi_tasks(process_status, command):
     ffmpeg_functions = [Names.compress, 
                                             Names.watermark,
-                                            Names.softmux, 
-                                            Names.softremux, 
                                             Names.convert, 
                                             Names.hardmux]
-    ffmpeg_functions.remove(base_process)
     p_text = ''
     for p in ffmpeg_functions:
         p_text+= f"`{p}`\n"
@@ -654,6 +651,24 @@ async def _compress_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        m_result = await multi_tasks(process_status, '/compress')
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
+        final_multi_tasks = []
+        final_convert_task = False
+        for m_task in process_status.multi_tasks:
+            if m_task.process_type==Names.convert:
+                final_convert_task = m_task
+            else:
+                final_multi_tasks.append(m_task)
+        if final_convert_task:
+            final_multi_tasks.append(final_convert_task)
+        process_status.replace_multi_tasks(final_multi_tasks)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -755,7 +770,7 @@ async def _add_watermark_to_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/watermark', Names.watermark)
+        m_result = await multi_tasks(process_status, '/watermark')
         if not m_result:
             for t in process_status.multi_tasks:
                 del t
@@ -809,6 +824,14 @@ async def _merge_videos(event):
             await event.reply("❗Atleast 2 Files Required To Merge")
             return
         await get_thumbnail(process_status, ["/merge", "pass"], 120)
+        m_result = await multi_tasks(process_status, '/merge')
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -877,6 +900,14 @@ async def _softmux_subtitles(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        m_result = await multi_tasks(process_status, '/softmux')
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -944,6 +975,14 @@ async def _softremux_subtitles(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        m_result = await multi_tasks(process_status, '/softremux')
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -1038,6 +1077,15 @@ async def _hardmux_subtitle(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        m_result = await multi_tasks(process_status, '/hardmux')
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
+        
         create_task(add_task(task))
         await update_status_message(event)
         return
