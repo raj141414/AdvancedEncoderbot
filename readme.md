@@ -14,6 +14,9 @@ To configure this bot add the environment variables stated below. Or add them in
 - `RUNNING_TASK_LIMIT` - (Required)Number Of Concurrent Tasks.
 - `UNFINISHED_PROGRESS_STR` - (Required)Unfinished progress bar string value.
 - `FINISHED_PROGRESS_STR` - (Required)Finished progress bar string value.
+- `UPDATE_PACKAGES` - (Optional)Set True if you want to update the packages.
+- `UPSTREAM_REPO` - (Optional)Your github repository link, if your repo is private add https://username:{githubtoken}@github.com/{username}/{reponame} format.
+- `UPSTREAM_BRANCH` - (Optional)Upstream branch for update.
 - `SAVE_TO_DATABASE` - (Required)Set value True if you want to use MongoDB Database else False.
 - `MONGODB_URI` - (Optional*)MongoDB URL to save data, only required when SAVE_TO_DATABASE's value is True.
 - `Use_Session_String` - (Required)Set value True if you want to use Telegram user session string to upload 4GB file to telegram else False.
