@@ -133,6 +133,7 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['gen_sample'] = False
         DATA[user_id]['tgdownload'] = "Telethon"
         DATA[user_id]['tgupload'] = "Telethon"
+        DATA[user_id]['upload_all'] = True
         if dbsave:
             data = await db.save_data(str(DATA))
         else:

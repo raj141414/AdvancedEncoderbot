@@ -331,6 +331,9 @@ async def general_callback(event, txt, user_id, chat_id):
             elif txt.startswith("generalgensample"):
                 await saveoptions(user_id, 'gen_sample', eval(new_position), SAVE_TO_DATABASE)
                 await event.answer(f"✅Generate Sample Video - {str(new_position)}")
+            elif txt.startswith("generaluploadall"):
+                await saveoptions(user_id, 'upload_all', eval(new_position), SAVE_TO_DATABASE)
+                await event.answer(f"✅Upload Every Multi Task File - {str(new_position)}")
             select_stream = get_data()[user_id]['select_stream']
             stream = get_data()[user_id]['stream']
             split_video = get_data()[user_id]['split_video']
@@ -343,6 +346,7 @@ async def general_callback(event, txt, user_id, chat_id):
             gen_ss = get_data()[user_id]['gen_ss']
             ss_no = get_data()[user_id]['ss_no']
             gen_sample = get_data()[user_id]['gen_sample']
+            upload_all = get_data()[user_id]['upload_all']
             # rclone = get_data()[user_id]['rclone']
             KeyBoard = []
             KeyBoard.append([Button.inline(f'🥝Auto Select Audio - {str(select_stream)}', 'nik66bots')])
@@ -377,6 +381,9 @@ async def general_callback(event, txt, user_id, chat_id):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🎞Generate Sample Video - {str(gen_sample)}', 'nik66bots')])
             for board in gen_keyboard(bool_list, gen_sample, "generalgensample", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'⏹Upload Every Multi Task File - {str(upload_all)}', 'nik66bots')])
+            for board in gen_keyboard(bool_list, upload_all, "generaluploadall", 2, False):
                 KeyBoard.append(board)
             if check_config:
                 accounts = await get_config(r_config)

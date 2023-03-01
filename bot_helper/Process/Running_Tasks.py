@@ -17,10 +17,26 @@ from bot_helper.Rclone.Rclone_Upload import upload_drive
 from os import remove
 
 
-async def clear_trash(task, trash_objects):
+async def clear_trash(task, trash_objects, multi_tasks):
+    new_task = False
+    if len(multi_tasks):
+        if check_running_process(task['process_status'].process_id):
+                new_process_status = multi_tasks[0]
+                new_process_status.move_send_files(task['process_status'].send_files)
+                multi_tasks.pop(0)
+                new_process_status.replace_multi_tasks(multi_tasks)
+                new_task = {}
+                new_task['process_status'] = new_process_status
+                new_task['functions'] = []
+        else:
+                for t in multi_tasks:
+                    del t
     async with working_task_lock:
         if task in working_task:
             working_task.remove(task)
+        if new_task:
+            create_task(start_task(new_task))
+            working_task.append(new_task)
     await remove_running_process(task['process_status'].process_id)
     try:
         rmtree(task['process_status'].dir)
@@ -71,7 +87,7 @@ async def process_status_checker():
                     if time()-task['process_status'].ping>600:
                         LOGGER.info(f"Removing {task['process_status'].process_type} Process Because Of No Response.")
                         await task['process_status'].event.reply(f"❗Removing This Task From Working Tasks As It Is Not Responding From Last 10 Minutes.")
-                        await clear_trash(task, False)
+                        await clear_trash(task, False, [])
                         await task_manager()
         except Exception as e:
                 LOGGER.info(str(e))
@@ -169,11 +185,15 @@ def get_user_id(process_id):
 
 async def start_task(task):
     process_status = task['process_status']
+    multi_tasks = process_status.multi_tasks
     process_status.update_start_time(time())
     await append_running_process(process_status.process_id)
-    process_completed = False
     loop_range = len(task['functions'])
     trash_objects = []
+    if loop_range:
+        process_completed = False
+    else:
+        process_completed = True
     for i in range(loop_range):
         dw_index = f"{str(i+1)}/{str(loop_range)}"
         if task['functions'][i][0]==Names.aria:
@@ -204,8 +224,9 @@ async def start_task(task):
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
             process_completed = False
             if process_status.process_type!=Names.merge:
-                    await FFMPEG.select_audio(process_status)
-                    await FFMPEG.change_metadata(process_status)
+                if not len(multi_tasks):
+                        await FFMPEG.select_audio(process_status)
+                        await FFMPEG.change_metadata(process_status)
             output_list = []
             if process_status.process_type==Names.convert:
                     convert_list = get_data()[process_status.user_id]['convert']['convert_list']
@@ -250,15 +271,17 @@ async def start_task(task):
                         if c==ffmpeg_range-1:
                             process_completed = True
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
-        await upload_files(process_status)
-        if check_running_process(process_status.process_id):
-                await FFMPEG.gen_sample_video(process_status)
-        if check_running_process(process_status.process_id):
-                await FFMPEG.generate_ss(process_status)
+        if get_data()[process_status.user_id]['upload_all'] or not len(multi_tasks):
+                await upload_files(process_status)
+        if not len(multi_tasks):
+            if check_running_process(process_status.process_id):
+                    await FFMPEG.gen_sample_video(process_status)
+            if check_running_process(process_status.process_id):
+                    await FFMPEG.generate_ss(process_status)
     if process_completed and process_status.process_type==Names.gensample:
         await FFMPEG.gen_sample_video(process_status, force_gen=True)
     if process_completed and process_status.process_type==Names.genss:
         await FFMPEG.generate_ss(process_status, force_gen=True)
-    await clear_trash(task, trash_objects)
+    await clear_trash(task, trash_objects, multi_tasks)
     await task_manager()
     return

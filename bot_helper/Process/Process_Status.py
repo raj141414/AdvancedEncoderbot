@@ -197,10 +197,27 @@ class ProcessStatus:
                 self.convert_index = "-/-"
                 self.ping = time()
                 self.trash_objects = False
+                self.multi_tasks = []
+                self.multi_task_no = 0
                 if self.user_name:
                         self.added_by = f'[{self.user_first_name}](https://t.me/{str(self.user_name)})'
                 else:
                         self.added_by = self.user_first_name
+                        
+        def append_multi_tasks(self, task):
+                self.multi_tasks.append(task)
+                self.multi_task_no+=1
+                return
+        
+        def get_multi_task_no(self):
+                if self.multi_task_no:
+                        return f"[{str(self.multi_task_no-len(self.multi_tasks))}/{str(self.multi_task_no)}]"
+                else:
+                        return ""
+        
+        def replace_multi_tasks(self, multi_tasks):
+                self.multi_tasks = multi_tasks
+                return
         
         def update_status_message(self, message):
                 self.message = message
@@ -293,6 +310,20 @@ class ProcessStatus:
                         LOGGER.info(f"{self.dir}/{name} File Not Found.")
                 return
         
+        def move_send_files(self, send_files):
+                for file in send_files:
+                        if exists(file):
+                                name = file.split("/")[-1]
+                                move_dir = f"{self.dir}/work_files"
+                                if exists(f"{move_dir}/{name}"):
+                                        move_dir = f"{self.dir}/{str(gen_random_string(5))}"
+                                create_direc(move_dir)
+                                LOGGER.info(f"Moving File {file} To {move_dir}/{name}")
+                                shutil_move(file, f"{move_dir}/{name}")
+                                self.send_files.append(f"{move_dir}/{name}")
+                        else:
+                                LOGGER.info(f"{file} File Not Found.")
+                        
         
         def append_subtitles(self, sub_loc):
                 if exists(sub_loc):
@@ -312,6 +343,7 @@ class ProcessStatus:
                         ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
                 total_files = len(self.send_files)
                 error_no = 0
+                multi_task_no = self.get_multi_task_no()
                 while True:
                         self.ping = time()
                         if status.type()==Names.aria:
@@ -368,7 +400,7 @@ class ProcessStatus:
                                 else:
                                                 process_state = f"{Names.STATUS[self.process_type]} [{total_files} Files]"
                                                 name = str(self.file_name)
-                                text =f'{process_state}\n'\
+                                text =f'{process_state} {multi_task_no}\n'\
                                                         f'`{name}`\n'\
                                                         f'{get_progress_bar_string(elapsed_time, status.duration)} {elapsed_time * 100 / status.duration:.1f}%\n'\
                                                         f'**Added By**: {self.added_by} | **ID**: `{self.user_id}`\n'\

@@ -38,6 +38,88 @@ SAVE_TO_DATABASE = Config.SAVE_TO_DATABASE
 
 #////////////////////////////////////Functions////////////////////////////////////#
 
+
+async def hardmux_multi_task(multi_process_status, event, chat_id, user_id, process_command):
+        new_event = await ask_media_OR_url(event, chat_id, user_id, [process_command, "stop"], f"Send Subtitle SRT File", 120, False, True, allow_magnet=False, allow_url=False)
+        if new_event and new_event not in ["cancelled", "stopped"]:
+            if new_event.message.file:
+                if not str(new_event.message.file.mime_type).startswith("video/") and not str(new_event.message.file.mime_type).startswith("image/"):
+                    if new_event.message.file.size<512000:
+                        sub_name = new_event.message.file.name
+                        create_direc(f"{multi_process_status.dir}/subtitles")
+                        sub_dw_loc = check_file(f"{multi_process_status.dir}/subtitles", sub_name)
+                        sub_path = await new_event.download_media(file=sub_dw_loc)
+                        multi_process_status.append_subtitles(sub_path)
+                        return True
+                    else:
+                        await event.reply("❌Subtitle Size Is More Than 500KB, Is This Really A Subtitle File")
+                        return False
+                else:
+                    await event.reply("❌I Need A Subtitle File.")
+                    return False
+            else:
+                await event.reply("❗Only Telegram File Is Supported")
+                return False
+        else:
+            return False
+
+
+
+async def append_multi_task(process_status, process_name, command, event):
+    multi_process_status = ProcessStatus(process_status.user_id, process_status.chat_id, process_status.user_name, process_status.user_first_name, event, process_name, process_status.file_name)
+    process_add_result = True
+    if process_name==Names.hardmux:
+                process_add_result = await hardmux_multi_task(multi_process_status, event, process_status.chat_id, process_status.user_id, command)
+    elif process_name==Names.watermark:
+                process_add_result = await ask_watermark(event, process_status.chat_id, process_status.user_id, command, True, all_handle=True)
+                    
+    if not process_add_result:
+            del multi_process_status
+            return False
+    else:
+        multi_process_status.set_custom_thumbnail(process_status.thumbnail)
+        process_status.append_multi_tasks(multi_process_status)
+        return True
+
+
+
+###############------Multi-Tasks------###############
+async def multi_tasks(process_status, command, base_process):
+    ffmpeg_functions = [Names.compress, 
+                                            Names.watermark,
+                                            Names.softmux, 
+                                            Names.softremux, 
+                                            Names.convert, 
+                                            Names.hardmux]
+    ffmpeg_functions.remove(base_process)
+    p_text = ''
+    for p in ffmpeg_functions:
+        p_text+= f"`{p}`\n"
+    q = 1
+    p_command = command
+    ffmpeg_functions.append("stop")
+    ffmpeg_functions.append("cancel")
+    m_result = True
+    chat_event = process_status.event
+    while True:
+        process_text = f'[{str(q)}] Send Process Name From Below To Do With The Output From {str(p_command).replace("/", "")} Process\n\n{str(p_text)}\n🔷Send `stop` To Process Task\n🔷Send `cancel` To Cancel Task'
+        process_ask_result = await ask_text(process_status.chat_id, process_status.user_id, chat_event, 120, process_text, str, include_list=ffmpeg_functions)
+        if process_ask_result:
+            if process_ask_result.message.message=="stop":
+                    break
+            elif process_ask_result.message.message=="cancel":
+                    await process_ask_result.reply("✅Task Cancelled")
+                    m_result = False
+                    break
+            add_result = await append_multi_task(process_status, process_ask_result.message.message, command, process_ask_result)
+            if add_result:
+                    p_command = process_ask_result.message.message
+                    chat_event = process_ask_result
+                    q+=1
+    return m_result
+
+
+
 ###############------Create_Dire------###############
 def create_direc(direc):
     if not isdir(direc):
@@ -163,7 +245,7 @@ async def get_custom_name(event):
     return custom_file_name
 
 ###############------Ask_Text------###############
-async def ask_text(chat_id, user_id, event, timeout, message, text_type):
+async def ask_text(chat_id, user_id, event, timeout, message, text_type, include_list=False):
     async with TELETHON_CLIENT.conversation(chat_id) as conv:
             handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: e.message.message), timeout=timeout)
             ask = await event.reply(f'*️⃣ {str(message)} [{str(timeout)} secs]')
@@ -174,7 +256,14 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type):
                 LOGGER.info(e)
                 return False
             try:
-                return text_type(new_event.message.message)
+                if not include_list:
+                    return text_type(new_event.message.message)
+                else:
+                    if text_type(new_event.message.message) not in include_list:
+                        await new_event.reply(f'❌Invalid Input')
+                        return False
+                    else:
+                        return new_event
             except:
                 await new_event.reply(f'❌Invalid Input')
                 return False
@@ -263,7 +352,7 @@ async def get_thumbnail(process_status, keywords, timeout):
 
 
 ###############------Ask_WaterMark------###############
-async def ask_watermark(event, chat_id, user_id, cmd, wt_check):
+async def ask_watermark(event, chat_id, user_id, cmd, wt_check, all_handle=False):
     watermark_path = f'./userdata/{str(user_id)}_watermark.jpg'
     watermark_check = exists(watermark_path)
     if watermark_check:
@@ -277,6 +366,8 @@ async def ask_watermark(event, chat_id, user_id, cmd, wt_check):
         await TELETHON_CLIENT.download_media(new_event.message, watermark_path)
         if exists(watermark_path):
             return True
+    if all_handle:
+        await new_event.reply('❗Failed To Get Watermark.')
     return False
 
 
@@ -664,6 +755,14 @@ async def _add_watermark_to_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
+        m_result = await multi_tasks(process_status, '/watermark', Names.watermark)
+        if not m_result:
+            for t in process_status.multi_tasks:
+                del t
+            for f in task['functions']:
+                del f
+            del process_status
+            return
         create_task(add_task(task))
         await update_status_message(event)
         return
