@@ -160,7 +160,8 @@ def get_commands(process_status):
                                 command += ['-vcodec','libx264', '-preset', softmux_preset]
         else:
                 command += ['-c','copy']
-        command += ["-y", output_file]
+        
+        command += ["-c:s", f"{get_data()[process_status.user_id]['softmux']['sub_codec']}", "-y", output_file]
         
         return command, log_file, input_file, output_file, file_duration
     

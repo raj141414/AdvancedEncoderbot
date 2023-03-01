@@ -311,6 +311,7 @@ class ProcessStatus:
                 if status.type()==Names.ffmpeg:
                         ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
                 total_files = len(self.send_files)
+                error_no = 0
                 while True:
                         self.ping = time()
                         if status.type()==Names.aria:
@@ -337,7 +338,6 @@ class ProcessStatus:
                                 if not check_running_process(self.process_id):
                                                 await self.event.reply("🔒Task Cancelled By User")
                                                 break
-                                error_no = 0
                                 if exists(status.log_file):
                                         with open(status.log_file, 'r+') as file:
                                                 text = file.read()
@@ -353,9 +353,9 @@ class ProcessStatus:
                                 if progress == "end":
                                         break
                                 elif progress == "error":
-                                        if error_no == 10:
+                                        if error_no == 30:
                                                 await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
-                                        if error_no==20:
+                                        if error_no==100:
                                                 break
                                         error_no+=1
                                 elapsed_time = time_in_us/1000000

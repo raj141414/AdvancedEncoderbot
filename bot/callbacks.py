@@ -44,6 +44,7 @@ async def callback(event):
             [Button.inline('🍧 Merge', 'merge_settings')],
             [Button.inline('🚜 Convert', 'convert_settings')],
             [Button.inline('🚍 HardMux', 'hardmux_settings')],
+            [Button.inline('🎮 SoftMux', 'softmux_settings')],
             [Button.inline('⭕Close Settings', 'close_settings')]
         ])
             return
@@ -123,6 +124,9 @@ async def callback(event):
             await hardmux_callback(event, txt, user_id, True)
             return
         
+        elif txt.startswith("softmux"):
+            await softmux_callback(event, txt, user_id, True)
+            return
         
         elif txt.startswith("merge"):
             await merge_callback(event, txt, user_id)
@@ -770,4 +774,30 @@ async def hardmux_callback(event, txt, user_id, edit):
                 except:
                     pass
                 await Telegram.TELETHON_CLIENT.send_message(event.chat.id, "⚙ Hardmux Settings", buttons=KeyBoard)
+            return
+
+
+###############------Softmux------###############
+async def softmux_callback(event, txt, user_id, edit):
+            new_position = txt.split("_", 1)[1]
+            KeyBoard = []
+            if txt.startswith("softmuxsubcodec"):
+                await saveconfig(user_id, 'softmux', 'sub_codec', new_position, SAVE_TO_DATABASE)
+                await event.answer(f"✅Softmux Sub Codec - {str(new_position)}")
+            softmux_sub_codec = get_data()[user_id]['softmux']['sub_codec']
+            KeyBoard.append([Button.inline(f'🍄Subtitles Codec - {str(softmux_sub_codec)}', 'nik66bots')])
+            for board in gen_keyboard(['copy', 'mov_text'], softmux_sub_codec, "softmuxsubcodec", 2, False):
+                KeyBoard.append(board)
+            KeyBoard.append([Button.inline(f'↩Back', 'settings')])
+            if edit:
+                try:
+                    await event.edit("⚙ Softmux Settings", buttons=KeyBoard)
+                except:
+                    pass
+            else:
+                try:
+                    await event.delete()
+                except:
+                    pass
+                await Telegram.TELETHON_CLIENT.send_message(event.chat.id, "⚙ Softmux Settings", buttons=KeyBoard)
             return

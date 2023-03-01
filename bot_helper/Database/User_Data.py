@@ -52,6 +52,7 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['softmux']['preset'] = 'ultrafast'
         DATA[user_id]['softmux']['use_crf'] = False
         DATA[user_id]['softmux']['crf'] = '23'
+        DATA[user_id]['softmux']['sub_codec'] = 'copy'
         DATA[user_id]['softmux']['map_audio'] = False
         DATA[user_id]['softmux']['map_sub'] = False
         DATA[user_id]['softmux']['map'] = False
@@ -61,6 +62,7 @@ async def new_user(user_id, dbsave):
         DATA[user_id]['softremux']['preset'] = 'ultrafast'
         DATA[user_id]['softremux']['use_crf'] = False
         DATA[user_id]['softremux']['crf'] = '23'
+        DATA[user_id]['softremux']['sub_codec'] = 'copy'
         DATA[user_id]['softremux']['map_audio'] = False
         DATA[user_id]['softremux']['map_sub'] = False
         DATA[user_id]['softremux']['map'] = False

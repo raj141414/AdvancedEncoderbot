@@ -125,7 +125,7 @@ async def get_link(event):
     if "|" in event.message.message:
         ext_data = event.message.message.split('|')
         custom_file_name = str(ext_data[-1]).strip()
-        commands = ext_data[1].strip().split(' ')
+        commands = ext_data[0].strip().split(' ')
     else:
         commands = event.message.message.split(' ')
     if len(commands)==2:
@@ -626,6 +626,7 @@ async def _settings(event):
         [Button.inline('🍧 Merge', 'merge_settings')],
         [Button.inline('🚜 Convert', 'convert_settings')],
         [Button.inline('🚍 HardMux', 'hardmux_settings')],
+        [Button.inline('🎮 SoftMux', 'softmux_settings')],
         [Button.inline('⭕Close Settings', 'close_settings')]
     ])
         return
