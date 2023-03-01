@@ -100,7 +100,7 @@ async def multi_tasks(process_status, command):
     chat_event = process_status.event
     while True:
         process_text = f'[{str(q)}] Send Process Name From Below To Do With The Output From {str(p_command).replace("/", "")} Process\n\n{str(p_text)}\n🔷Send `stop` To Process Task\n🔷Send `cancel` To Cancel Task'
-        process_ask_result = await ask_text(process_status.chat_id, process_status.user_id, chat_event, 120, process_text, str, include_list=ffmpeg_functions)
+        process_ask_result = await ask_text_list(process_status.chat_id, process_status.user_id, chat_event, 120, process_text, ffmpeg_functions)
         if process_ask_result:
             if process_ask_result.message.message=="stop":
                     break
@@ -264,6 +264,20 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type, include
             except:
                 await new_event.reply(f'❌Invalid Input')
                 return False
+
+
+###############------Ask_Text_List------###############
+async def ask_text_list(chat_id, user_id, event, timeout, message, include_list):
+    async with TELETHON_CLIENT.conversation(chat_id) as conv:
+            handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: str(e.message.message) in include_list), timeout=timeout)
+            ask = await event.reply(f'*️⃣ {str(message)} [{str(timeout)} secs]')
+            try:
+                new_event = await handle
+            except Exception as e:
+                await ask.reply('🔃Timed Out! Task Has Been Cancelled.')
+                LOGGER.info(e)
+                return False
+            return new_event
 
 ###############------Ask Media OR URL------###############
 async def ask_media_OR_url(event, chat_id, user_id, keywords, message, timeout, mtype, s_handle, allow_magnet=True, allow_url=True, message_hint=False, allow_command=False, stop_on_url=True):
@@ -651,28 +665,29 @@ async def _compress_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/compress')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/compress')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -774,28 +789,29 @@ async def _add_watermark_to_video(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/watermark')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/watermark')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -842,28 +858,29 @@ async def _merge_videos(event):
             await event.reply("❗Atleast 2 Files Required To Merge")
             return
         await get_thumbnail(process_status, ["/merge", "pass"], 120)
-        m_result = await multi_tasks(process_status, '/merge')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/merge')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -932,28 +949,29 @@ async def _softmux_subtitles(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/softmux')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/softmux')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -1021,28 +1039,29 @@ async def _softremux_subtitles(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/softremux')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/softremux')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return
@@ -1137,28 +1156,29 @@ async def _hardmux_subtitle(event):
                 task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
         else:
             task['functions'].append(["TG", [link]])
-        m_result = await multi_tasks(process_status, '/hardmux')
-        if not m_result:
-            for t in process_status.multi_tasks:
-                del t
-            for f in task['functions']:
-                del f
-            del process_status
-            return
-        final_multi_tasks = []
-        final_convert_task = False
-        for m_task in process_status.multi_tasks:
-            if m_task.process_type==Names.convert:
-                final_convert_task = m_task
-            else:
-                final_multi_tasks.append(m_task)
-        if final_convert_task:
-            final_multi_tasks.append(final_convert_task)
-        process_status.replace_multi_tasks(final_multi_tasks)
-        final_multi_tasks_no = len(final_multi_tasks)+1
-        process_status.change_multi_tasks_no(final_multi_tasks_no)
-        for f in final_multi_tasks:
-            f.change_multi_tasks_no(final_multi_tasks_no)
+        if get_data()[user_id]['multi_tasks']:
+                m_result = await multi_tasks(process_status, '/hardmux')
+                if not m_result:
+                    for t in process_status.multi_tasks:
+                        del t
+                    for f in task['functions']:
+                        del f
+                    del process_status
+                    return
+                final_multi_tasks = []
+                final_convert_task = False
+                for m_task in process_status.multi_tasks:
+                    if m_task.process_type==Names.convert:
+                        final_convert_task = m_task
+                    else:
+                        final_multi_tasks.append(m_task)
+                if final_convert_task:
+                    final_multi_tasks.append(final_convert_task)
+                process_status.replace_multi_tasks(final_multi_tasks)
+                final_multi_tasks_no = len(final_multi_tasks)+1
+                process_status.change_multi_tasks_no(final_multi_tasks_no)
+                for f in final_multi_tasks:
+                    f.change_multi_tasks_no(final_multi_tasks_no)
         create_task(add_task(task))
         await update_status_message(event)
         return

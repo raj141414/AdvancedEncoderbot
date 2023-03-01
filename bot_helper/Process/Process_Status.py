@@ -214,7 +214,7 @@ class ProcessStatus:
         
         def get_multi_task_no(self):
                 if self.multi_task_no:
-                        return f"[{str(self.multi_task_no-len(self.multi_tasks))}/{str(self.multi_task_no)}]"
+                        return f"({str(self.multi_task_no-len(self.multi_tasks))}/{str(self.multi_task_no)})"
                 else:
                         return ""
         
