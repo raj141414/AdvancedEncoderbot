@@ -27,6 +27,10 @@ status_update = {}
 status_update_lock = Lock()
 
 
+if not isdir('./botdata'):
+    makedirs("./botdata")
+
+
 
 #////////////////////////////////////Variables////////////////////////////////////#
 sudo_users = Config.SUDO_USERS
