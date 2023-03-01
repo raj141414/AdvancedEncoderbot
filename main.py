@@ -67,8 +67,8 @@ async def set_bot_commands(command_file):
 ###############------Check_Restart------###############
 async def check_restart():
     try:
-        chat, msg_id = DATA['restart'][0]
-        await clear_restart()
+        with open(".restartmsg") as f:
+            chat, msg_id = map(int, f)
         await Telegram.TELETHON_CLIENT.edit_message(chat, msg_id, '✅Restarted Successfully')
     except Exception as e:
         LOGGER.info("🧩Error While Updating Restart Message:\n\n", e)
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     Telegram.TELETHON_CLIENT.start(bot_token=Config.TOKEN)
     telethob_bot = Telegram.TELETHON_CLIENT.loop.run_until_complete(get_me(Telegram.TELETHON_CLIENT))
     LOGGER.info("🔶Checking For Restart Notification")
-    if Config.SAVE_TO_DATABASE and 'restart' in DATA and len(DATA['restart']):
+    if exists(".restartmsg"):
         Telegram.TELETHON_CLIENT.loop.run_until_complete(check_restart())
     elif Config.RESTART_NOTIFY_ID:
         Telegram.TELETHON_CLIENT.loop.run_until_complete(notify_restart(Config.RESTART_NOTIFY_ID))
