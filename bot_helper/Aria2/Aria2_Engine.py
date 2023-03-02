@@ -272,7 +272,6 @@ class AriaDownloadStatus:
     def onDownloadStarted(self):
         self.listener().update_status_message(Names.STATUS_DOWNLOADING)
         self.listener().append_dw_files(self.name())
-        self.listener().set_file_name(self.name())
         return
     
     def onDownloadComplete(self):

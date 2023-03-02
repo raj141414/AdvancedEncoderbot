@@ -653,10 +653,11 @@ async def _cancel(event):
                 try:
                         if processx=="aria":
                             if dl := getDownloadByGid(process_id):
-                                if dl.listener().user_id==user_id or sudo_user_checker_id(user_id):
+                                if dl.listener().user_id==user_id or user_id==owner_id:
                                     await Aria2.cancel_download(process_id)
+                                    await remove_from_working_task(dl.listener().process_id)
                                 else:
-                                    await event.reply(f'❗You Have No Permission To Delete')
+                                    await event.reply(f'❗You Have No Permission To Cancel This Task')
                                     return
                             else:
                                 await event.reply(f'❗No download with this id')
@@ -664,20 +665,24 @@ async def _cancel(event):
                         elif processx=="process":
                             add_user_id = get_user_id(process_id)
                             if add_user_id:
-                                if add_user_id==user_id or sudo_user_checker_id(user_id):
+                                if add_user_id==user_id or user_id==owner_id:
                                     cancel_result = await remove_running_process(process_id)
                                     await remove_from_working_task(process_id)
                                     if not cancel_result:
                                             await event.reply(f'❗No process with this id')
                                             return
+                                else:
+                                    await event.reply(f'❗You Have No Permission To Cancel This Task')
+                                    return
                             else:
-                                if sudo_user_checker_id(user_id):
+                                if user_id==owner_id:
                                     cancel_result = await remove_running_process(process_id)
+                                    await remove_from_working_task(process_id)
                                     if not cancel_result:
                                             await event.reply(f'❗No process with this id')
                                             return
                                 else:
-                                    await event.reply(f'❗Failed to verify user id')
+                                    await event.reply(f'❗You Have No Permission To Cancel This Task')
                                     return
                         await event.reply(f'✅Successfully Cancelled.')
                 except Exception as e:

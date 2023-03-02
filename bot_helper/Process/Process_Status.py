@@ -137,11 +137,16 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         qsize_text = f"**Queue Size**: {str(get_data()[user_id]['watermark']['queue_size'])}"
                 else:
                         qsize_text = f"**Queue Size**: False"
+                if get_data()[user_id]['watermark']['encode']:
+                        encoder = get_data()[user_id]['watermark']['encoder']
+                else:
+                        encoder = 'False'
+                        
                 text = f"\n**SYNC**: {get_data()[user_id]['watermark']['sync']} | **Preset**: {get_data()[user_id]['watermark']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['watermark']['crf']} | **Copy Subtitles**: {get_data()[user_id]['watermark']['copy_sub']}\n"\
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['watermark']['map']}\n"\
                         f"**W.Size**: {get_data()[user_id]['watermark']['size']} | **W.Position**: {ws_name[get_data()[user_id]['watermark']['position']]}\n"\
-                        f"**Encoder**: {get_data()[user_id]['watermark']['encoder']}"
+                        f"**Encoder**: {encoder}"
                 return text
         elif pmode==Names.merge:
                 text = f"\n**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
@@ -151,19 +156,27 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         qsize_text = f"**Queue Size**: {str(get_data()[user_id]['convert']['queue_size'])}"
                 else:
                         qsize_text = f"**Queue Size**: False"
+                if get_data()[user_id]['convert']['encode']:
+                        encoder = get_data()[user_id]['convert']['encoder']
+                else:
+                        encoder = 'False'
                 text = f"\n**SYNC**: {get_data()[user_id]['convert']['sync']} | **Preset**: {get_data()[user_id]['convert']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['convert']['crf']} | **Copy Subtitles**: {get_data()[user_id]['convert']['copy_sub']}\n"\
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['convert']['map']}\n"\
-                        f"**Encoder**: {get_data()[user_id]['convert']['encoder']} | **C.Qualities**: {get_data()[user_id]['convert']['convert_list']}"
+                        f"**Encoder**: {encoder} | **C.Qualities**: {get_data()[user_id]['convert']['convert_list']}"
                 return text
         elif pmode==Names.hardmux:
                 if get_data()[user_id]['hardmux']['use_queue_size']:
                         qsize_text = f"**Queue Size**: {str(get_data()[user_id]['hardmux']['queue_size'])}"
                 else:
                         qsize_text = f"**Queue Size**: False"
+                if get_data()[user_id]['hardmux']['encode']:
+                        encoder = get_data()[user_id]['hardmux']['encoder']
+                else:
+                        encoder = 'False'
                 text = f"\n**SYNC**: {get_data()[user_id]['hardmux']['sync']} | **Preset**: {get_data()[user_id]['hardmux']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['hardmux']['crf']} | {qsize_text}\n"\
-                        f"**Encoder**: {get_data()[user_id]['hardmux']['encoder']} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
+                        f"**Encoder**: {encoder} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
                 return text
         elif pmode==Names.softmux:
                 text = f"\n**Subtitles Codec**: {get_data()[user_id]['softmux']['sub_codec']}"
@@ -304,6 +317,20 @@ class ProcessStatus:
         def set_file_name(self, file_name):
                 if not self.file_name:
                         self.file_name = file_name
+                return
+        
+        def set_file_name_from_send_list(self):
+                if not self.file_name:
+                        try:
+                                if len(self.send_files):
+                                        self.file_name = self.send_files[-1].split("/")[-1]
+                                        LOGGER.info(f"File Name : {self.file_name}")
+                                else:
+                                        LOGGER.info(f"No File In Send Files To Set File Name")
+                        except Exception as e:
+                                LOGGER.info(f"Error While Setting File Name  {str(e)}")
+                else:
+                        LOGGER.info(f"File Name Already Set : {str(self.file_name)}")
                 return
         
         def set_caption(self, caption):

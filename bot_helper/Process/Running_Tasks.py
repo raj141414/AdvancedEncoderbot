@@ -17,6 +17,7 @@ from bot_helper.Rclone.Rclone_Upload import upload_drive
 from os import remove
 
 
+
 async def clear_trash(task, trash_objects, multi_tasks):
     new_task = False
     if len(multi_tasks):
@@ -226,6 +227,8 @@ async def start_task(task):
             break
         if i==loop_range-1:
             process_completed = True
+            process_status.set_file_name_from_send_list()
+            
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
             process_completed = False
             if process_status.process_type!=Names.merge:
