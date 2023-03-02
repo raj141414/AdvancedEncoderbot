@@ -426,12 +426,12 @@ class ProcessStatus:
                                                 break
                                 if exists(status.log_file):
                                         with open(status.log_file, 'r+') as file:
-                                                text = file.read()
-                                                time_in_us = get_value(refindall("out_time_ms=(.+)", text), int, 1)
-                                                progress=get_value(refindall("progress=(\w+)", text), str, "error")
-                                                speed=get_value(refindall("speed=(\d+\.?\d*)", text), float, 1)
-                                                # bitrate = get_value(refindall("bitrate=(.+)", text), str, "0")
-                                                # fps = get_value(refindall("fps=(.+)", text), str, "0")
+                                                ffmpeg_text = file.read()
+                                                time_in_us = get_value(refindall("out_time_ms=(.+)", ffmpeg_text), int, 1)
+                                                progress=get_value(refindall("progress=(\w+)", ffmpeg_text), str, "error")
+                                                speed=get_value(refindall("speed=(\d+\.?\d*)", ffmpeg_text), float, 1)
+                                                # bitrate = get_value(refindall("bitrate=(.+)", ffmpeg_text), str, "0")
+                                                # fps = get_value(refindall("fps=(.+)", ffmpeg_text), str, "0")
                                 else:
                                         time_in_us = 1
                                         progress="error"
@@ -440,7 +440,15 @@ class ProcessStatus:
                                         break
                                 elif progress == "error":
                                         if error_no == 30:
-                                                await self.event.reply(f'❗FFMPEG Log File Not Found or Some Error Occurred.')
+                                                if exists(status.log_file):
+                                                        try:
+                                                                LOGGER.info(f"FFMPEG Log File Data Start>\n{str(ffmpeg_text)}\n<end FFMPEG Log File Data")
+                                                        except:
+                                                                LOGGER.info(f"Failed To Get FFMPEG Log Data [{str(len(ffmpeg_text))}]")
+                                                        await self.event.reply(f'❗Some Error Occurred.')
+                                                else:
+                                                        LOGGER.info(f"FFMPEG Log File {status.log_file} Not Found.")
+                                                        await self.event.reply(f'❗FFMPEG Log File Not Found.')
                                         if error_no==100:
                                                 break
                                         error_no+=1

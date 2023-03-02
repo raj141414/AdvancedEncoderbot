@@ -255,7 +255,10 @@ async def start_task(task):
                     ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
                     trash_objects.append(ffmpeg_status)
                     while True:
-                        if exists(log_file) or not check_running_process(process_status.process_id):
+                        if not check_running_process(process_status.process_id):
+                            break
+                        if exists(log_file):
+                            LOGGER.info(f"Log File {log_file} Found , Starting Status Update")
                             break
                     await process_status.update_status(ffmpeg_status)
                     if not check_running_process(process_status.process_id):
