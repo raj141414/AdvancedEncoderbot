@@ -121,7 +121,7 @@ def ffmpeg_status_foot(status, user_id, start_time, time_in_us):
         return status_foot
 
 
-def generate_ffmpeg_status_head(user_id, pmode):
+def generate_ffmpeg_status_head(user_id, pmode, input_size):
         if pmode==Names.compress:
                 if get_data()[user_id]['compress']['use_queue_size']:
                         qsize_text = f"**Queue Size**: {str(get_data()[user_id]['compress']['queue_size'])}"
@@ -130,7 +130,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                 text = f"\n**SYNC**: {get_data()[user_id]['compress']['sync']} | **Preset**: {get_data()[user_id]['compress']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['compress']['crf']} | **Copy Subtitles**: {get_data()[user_id]['compress']['copy_sub']}\n"\
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['compress']['map']}\n"\
-                        f"**Encoder**: {get_data()[user_id]['compress']['encoder']}"
+                        f"**Encoder**: {get_data()[user_id]['compress']['encoder']} | **In.Size**: {get_human_size(input_size)}"
                 return text
         elif pmode==Names.watermark:
                 if get_data()[user_id]['watermark']['use_queue_size']:
@@ -146,7 +146,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         f"**CRF**: {get_data()[user_id]['watermark']['crf']} | **Copy Subtitles**: {get_data()[user_id]['watermark']['copy_sub']}\n"\
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['watermark']['map']}\n"\
                         f"**W.Size**: {get_data()[user_id]['watermark']['size']} | **W.Position**: {ws_name[get_data()[user_id]['watermark']['position']]}\n"\
-                        f"**Encoder**: {encoder}"
+                        f"**Encoder**: {encoder} | **In.Size**: {get_human_size(input_size)}"
                 return text
         elif pmode==Names.merge:
                 text = f"\n**MAP**: {get_data()[user_id]['merge']['map']} | **Fix Blank**: {get_data()[user_id]['merge']['fix_blank']}"
@@ -163,7 +163,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                 text = f"\n**SYNC**: {get_data()[user_id]['convert']['sync']} | **Preset**: {get_data()[user_id]['convert']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['convert']['crf']} | **Copy Subtitles**: {get_data()[user_id]['convert']['copy_sub']}\n"\
                         f"{qsize_text} | **MAP**: {get_data()[user_id]['convert']['map']}\n"\
-                        f"**Encoder**: {encoder} | **C.Qualities**: {get_data()[user_id]['convert']['convert_list']}"
+                        f"**Encoder**: {encoder} | **In.Size**: {get_human_size(input_size)}"
                 return text
         elif pmode==Names.hardmux:
                 if get_data()[user_id]['hardmux']['use_queue_size']:
@@ -176,13 +176,13 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         encoder = 'False'
                 text = f"\n**SYNC**: {get_data()[user_id]['hardmux']['sync']} | **Preset**: {get_data()[user_id]['hardmux']['preset']}\n"\
                         f"**CRF**: {get_data()[user_id]['hardmux']['crf']} | {qsize_text}\n"\
-                        f"**Encoder**: {encoder} | **Encode Video**: {get_data()[user_id]['hardmux']['encode_video']}"
+                        f"**Encoder**: {encoder} | **In.Size**: {get_human_size(input_size)}"
                 return text
         elif pmode==Names.softmux:
-                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softmux']['sub_codec']}"
+                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softmux']['sub_codec']} | **In.Size**: {get_human_size(input_size)}"
                 return text
         elif pmode==Names.softremux:
-                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softremux']['sub_codec']}"
+                text = f"\n**Subtitles Codec**: {get_data()[user_id]['softremux']['sub_codec']} | **In.Size**: {get_human_size(input_size)}"
                 return text
         else:
                 return ""
@@ -393,7 +393,8 @@ class ProcessStatus:
         
         async def update_status(self, status):
                 if status.type()==Names.ffmpeg:
-                        ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type)
+                        input_size = status.input_size()
+                        ffmpeg_head = generate_ffmpeg_status_head(self.user_id, self.process_type, input_size)
                 total_files = len(self.send_files)
                 error_no = 0
                 multi_task_no = self.get_multi_task_no()
