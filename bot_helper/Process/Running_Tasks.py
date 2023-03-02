@@ -279,8 +279,7 @@ async def start_task(task):
                             await process_status.event.client.send_file(process_status.chat_id, file=f"{process_status.dir}/FFMPEG_LOG.txt", allow_cache=False, reply_to=process_status.event.message, caption=f"❌{process_status.process_type} Process Error\n\nReturn Code: {return_code}\n\nFileName: {input_file.split('/')[-1]}")
                             remove(f"{process_status.dir}/FFMPEG_LOG.txt")
                             break
-                        if c==ffmpeg_range-1:
-                            process_completed = True
+                        process_completed = True
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
         if get_data()[process_status.user_id]['upload_all'] or not len(multi_tasks):
                 await upload_files(process_status)
