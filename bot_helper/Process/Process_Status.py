@@ -170,7 +170,7 @@ def generate_ffmpeg_status_head(user_id, pmode):
                         qsize_text = f"**Queue Size**: {str(get_data()[user_id]['hardmux']['queue_size'])}"
                 else:
                         qsize_text = f"**Queue Size**: False"
-                if get_data()[user_id]['hardmux']['encode']:
+                if get_data()[user_id]['hardmux']['encode_video']:
                         encoder = get_data()[user_id]['hardmux']['encoder']
                 else:
                         encoder = 'False'
