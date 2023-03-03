@@ -14,6 +14,7 @@ from json import loads
 from os.path import getsize, isdir, exists
 from shutil import move as shutil_move
 from os import makedirs, rename
+from aiofiles import open as aio_open
 
 
 def create_direc(direc):
@@ -503,7 +504,6 @@ class ProcessStatus:
                 
         async def rclone__update_status(self, rclone_process, name, search_command, fileloc, r_config, drive_name, status):
                 Cancel = False
-                log = []
                 while True:
                     self.ping = time()
                     try:
@@ -512,8 +512,9 @@ class ProcessStatus:
                                                 Cancel = True
                                                 break
                                         line = line.decode().strip()
-                                        log.append(line)
                                         print(line)
+                                        async with aio_open(f"{self.dir}/upload_log_{str(name)}.txt", "a+", encoding="utf-8") as f:
+                                                        await f.write(f'{str(line)}\n')
                                         try:
                                                 datam = refindall("Transferred:.*ETA.*", line)
                                                 if datam is not None:
@@ -544,16 +545,18 @@ class ProcessStatus:
                         if rclone_process.returncode==0:
                                 await check_file_drive_link(search_command, self.event, fileloc, r_config, drive_name, name, self.caption)
                         else:
-                                with open(f"{self.dir}/uploaderror{str(name)}.txt", "w", encoding="utf-8") as f:
-                                        f.write(str(log))
-                                await self.event.client.send_file(self.chat_id, file=f"{self.dir}/uploaderror{str(name)}.txt", allow_cache=False, reply_to=self.event.message, caption=f"❌Error While Uploading {str(name)} To Drive")
-                                remove(f"{self.dir}/uploaderror{str(name)}.txt")
+                                if exists(f"{self.dir}/upload_log_{str(name)}.txt"):
+                                                await self.event.client.send_file(self.chat_id, file=f"{self.dir}/upload_log_{str(name)}.txt", allow_cache=False, reply_to=self.event.message, caption=f"❌Error While Uploading {str(name)} To Drive")
+                                else:
+                                        await self.event.reply(f'❗Rclone Log File Not Found')
                 else:
                         try:
                                 rclone_process.kill()
                         except Exception as e:
                                 LOGGER.info(str(e))
-                        del log
+                        if exists(f"{self.dir}/upload_log_{str(name)}.txt"):
+                                remove(f"{self.dir}/upload_log_{str(name)}.txt")
                         return False
-                del log
+                if exists(f"{self.dir}/upload_log_{str(name)}.txt"):
+                        remove(f"{self.dir}/upload_log_{str(name)}.txt")
                 return True

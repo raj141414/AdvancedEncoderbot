@@ -287,6 +287,8 @@ async def start_task(task):
                                 await process_status.event.reply(f"❗FFMPEG Log File Not Found")
                             break
                         process_completed = True
+                        if exists(f"{process_status.dir}/FFMPEG_LOG.txt"):
+                            remove(f"{process_status.dir}/FFMPEG_LOG.txt")
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
         if get_data()[process_status.user_id]['upload_all'] or not len(multi_tasks):
                 await upload_files(process_status)

@@ -44,7 +44,6 @@ class FfmpegStatus:
                 try:
                     async for line in self.process.stderr:
                             if not check_running_process(process_id):
-                                    LOGGER.info(f'FFMPEG Log Saver Cancelled : {process_id}')
                                     break
                             line = line.decode('utf-8').strip()
                             print(line)
