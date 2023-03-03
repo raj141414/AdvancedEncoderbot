@@ -644,7 +644,7 @@ async def _renew(event):
 ###############------Save_Stats------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/stats', func=lambda e: sudo_user_checker_event(e)))
 async def _stats_msg(event):
-    await event.reply(str(get_host_stats()), parse_mode='html')
+    await event.reply(str(await get_host_stats()), parse_mode='html')
     return
 
 
