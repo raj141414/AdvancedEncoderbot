@@ -16,6 +16,7 @@ from string import ascii_lowercase, digits
 from random import choices
 from config.config import Config
 from dotenv import dotenv_values
+from psutil import disk_usage, cpu_percent, swap_memory, cpu_count, virtual_memory, net_io_counters, boot_time
 
 
 #////////////////////////////////////Variables////////////////////////////////////#
@@ -239,7 +240,7 @@ async def execute(cmnd: str) -> Tuple[str, str, int, int]:
         stdout=PIPE,
         stderr=PIPE
     )
-    stdout, stderr = await process.communicate()
+    stdout, _ = await process.communicate()
     return stdout.decode('utf-8', 'replace').strip()
 
 
@@ -336,3 +337,31 @@ def export_env_file(env_file, env_dict):
                 f.write(env_data)
         return True
     return False
+
+
+###############------Get_Stats_Message------###############
+async def get_host_stats():
+        if exists('.git'):
+                last_commit = await execute("git log -1 --date=short --pretty=format:'%cd <b>From</b> %cr'")
+        else:
+                last_commit = 'No UPSTREAM_REPO'
+        total, used, free, disk = disk_usage('/')
+        swap = swap_memory()
+        memory = virtual_memory()
+        stats =f'<b>Commit Date:</b> {last_commit}\n\n'\
+                    f'<b>Bot Uptime:</b> {get_readable_time(time() - botStartTime)}\n'\
+                    f'<b>OS Uptime:</b> {get_readable_time(time() - boot_time())}\n\n'\
+                    f'<b>Total Disk Space:</b> {get_size(total)}\n'\
+                    f'<b>Used:</b> {get_size(used)} | <b>Free:</b> {get_size(free)}\n\n'\
+                    f'<b>Upload:</b> {get_size(net_io_counters().bytes_sent)}\n'\
+                    f'<b>Download:</b> {get_size(net_io_counters().bytes_recv)}\n\n'\
+                    f'<b>CPU:</b> {cpu_percent(interval=0.5)}%\n'\
+                    f'<b>RAM:</b> {memory.percent}%\n'\
+                    f'<b>DISK:</b> {disk}%\n\n'\
+                    f'<b>Physical Cores:</b> {cpu_count(logical=False)}\n'\
+                    f'<b>Total Cores:</b> {cpu_count(logical=True)}\n\n'\
+                    f'<b>SWAP:</b> {get_size(swap.total)} | <b>Used:</b> {swap.percent}%\n'\
+                    f'<b>Memory Total:</b> {get_size(memory.total)}\n'\
+                    f'<b>Memory Free:</b> {get_size(memory.available)}\n'\
+                    f'<b>Memory Used:</b> {get_size(memory.used)}'
+        return stats
