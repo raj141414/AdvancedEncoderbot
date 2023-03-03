@@ -427,7 +427,7 @@ class ProcessStatus:
                                                 await self.event.reply("🔒Task Cancelled By User")
                                                 break
                                 if status.returncode:
-                                        LOGGER.info('Status Update: Stopping Beacause ReturnCode Exists.')
+                                        LOGGER.info('Status Update: Stopping Because ReturnCode Exists.')
                                         break
                                 if exists(status.log_file):
                                         with open(status.log_file, 'r+') as file:

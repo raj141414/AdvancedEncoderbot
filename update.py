@@ -48,6 +48,7 @@ else:
 
 UPDATE_PACKAGES = environ.get('UPDATE_PACKAGES', 'False')
 if UPDATE_PACKAGES.lower() == 'true':
+    log_info(f"⏺Updater: Updating Packages")
     scall("pip install -r requirements.txt", shell=True)
 
 UPSTREAM_REPO = environ.get('UPSTREAM_REPO', '')
@@ -61,7 +62,9 @@ if len(UPSTREAM_BRANCH) == 0:
 if UPSTREAM_REPO is not None:
     if exists('.git'):
         srun(["rm", "-rf", ".git"])
-
+        log_info(f"⏺Updater: Clearing .git")
+        
+    log_info(f"⏺Updater: Updating From Github")
     update = srun([f"git init -q \
                      && git config --global user.email nik66x@gmail.com \
                      && git config --global user.name nik66 \
