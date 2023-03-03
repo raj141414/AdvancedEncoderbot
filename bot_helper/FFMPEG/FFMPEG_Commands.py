@@ -284,7 +284,7 @@ def get_commands(process_status):
         output_file = f"{process_status.dir}/metadata/{get_output_name(process_status)}"
         file_duration = get_video_duration(input_file)
         custom_metadata = process_status.custom_metadata
-        command = ["ffmpeg", "-i", f"{input_file}"]
+        command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
         for m in custom_metadata:
             command+=m
         command += ["-map", "0", "-c", "copy", '-y', f"{output_file}"]
