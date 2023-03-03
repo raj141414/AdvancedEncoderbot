@@ -1471,6 +1471,7 @@ async def _change_metadata(event):
         custom_metadata = []
         for m in custom_metadata_list:
             mdata = str(m).strip().split('-')
+            LOGGER.info(mdata)
             try:
                 sindex = mdata[0]
                 mlang =  str(mdata[1]).lower()
