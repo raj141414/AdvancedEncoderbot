@@ -1473,10 +1473,12 @@ async def _change_metadata(event):
             mdata = str(m).strip().split('-')
             LOGGER.info(mdata)
             try:
-                sindex = mdata[0]
+                sindex = str(mdata[0]).strip().lower()
                 mlang =  str(mdata[1]).lower()
                 mtilte = str(mdata[2])
-                custom_metadata.append([f'-metadata:s:{str(sindex)}', f"language='{mlang}", f'-metadata:s:{str(sindex)}', f"title='{mtilte}'"])
+                if not sindex.startswith('a:') or not sindex.startswith('s:'):
+                    await metadata_event.reply(f"❗Invalid Input")
+                custom_metadata.append([f'-metadata:s:{sindex}', f"language={mlang}", f'-metadata:s:{str(sindex)}', f"title={mtilte}"])
             except Exception as e:
                 await metadata_event.reply(f"❗Invalid Metadata, Error: {str(e)}")
                 return
