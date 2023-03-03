@@ -7,6 +7,7 @@ softmux - Softmux Video
 softremux - Softremux Video
 gensample - Generate Sample Video
 genss - Generate Screenshots
+changemetadata - Change Video Metadata
 savewatermark - Save Watermark Image
 saveconfig - Save Rclone Config
 tasklimit - Change Task Limit
