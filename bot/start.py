@@ -1464,7 +1464,7 @@ async def _change_metadata(event):
                 link = await get_url_from_message(new_event)
             else:
                 return
-        metadata_event = await ask_text_event(chat_id, user_id, event, 120, "Send MetaData", message_hint="🔷`a` Is For Audio & `s` Is For Subtitle\n Send In The Format As Shown Below:\n\n`a:0-AudioLanguage-AudioTitle` (To Change Audio Number 1 Metadata)\n`s:0-SubLanguage-SubTitle` (To Change Subtitle Number 1 Metadata)\n\ne.g. `a:1-eng-nik66bots` (To Change Audio Number 1 Metadata)")
+        metadata_event = await ask_text_event(chat_id, user_id, event, 120, "Send MetaData", message_hint="🔷`a` Is For Audio & `s` Is For Subtitle\n🔷 Send In The Format As Shown Below:\n\n`a:0-AudioLanguage-AudioTitle` (To Change Audio Number 1 Metadata)\n`s:0-SubLanguage-SubTitle` (To Change Subtitle Number 1 Metadata)\n\ne.g. `a:1-eng-nik66bots` (To Change Audio Number 1 Metadata)")
         if not metadata_event:
             return
         custom_metadata_list = str(metadata_event.message.message).split('\n')
@@ -1476,8 +1476,6 @@ async def _change_metadata(event):
                 sindex = str(mdata[0]).strip().lower()
                 mlang =  str(mdata[1]).lower()
                 mtilte = str(mdata[2])
-                if not sindex.startswith('a:') or not sindex.startswith('s:'):
-                    await metadata_event.reply(f"❗Invalid Input")
                 custom_metadata.append([f'-metadata:s:{sindex}', f"language={mlang}", f'-metadata:s:{str(sindex)}', f"title={mtilte}"])
             except Exception as e:
                 await metadata_event.reply(f"❗Invalid Metadata, Error: {str(e)}")
