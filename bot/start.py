@@ -1476,7 +1476,7 @@ async def _change_metadata(event):
                 sindex = mdata[0]
                 mlang =  str(mdata[1]).lower()
                 mtilte = str(mdata[2])
-                if not sindex.startswith('a:') or not sindex.startswith('s:'):
+                if not sindex.startswith('a') or not sindex.startswith('s'):
                     await metadata_event.reply(f"❗{str(sindex)} This Is Not A Valid Input")
                     return
                 custom_metadata.append([f'-metadata:s:{str(sindex)}', f"language='{mlang}", f'-metadata:s:{str(sindex)}', f"title='{mtilte}'"])
