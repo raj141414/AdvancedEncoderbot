@@ -17,6 +17,12 @@ from bot_helper.Rclone.Rclone_Upload import upload_drive
 from os import remove
 
 
+def create_log_file(log_file):
+    with open(log_file, 'w') as _:
+        LOGGER.info(f'Log File Created : {log_file}')
+    return
+
+
 
 async def clear_trash(task, trash_objects, multi_tasks):
     new_task = False
@@ -247,6 +253,7 @@ async def start_task(task):
                             process_status.update_convert_index(f"{str(c+1)}/{str(ffmpeg_range)}")
                     command, log_file, input_file, output_file, file_duration = get_commands(process_status)
                     LOGGER.info(str(command))
+                    create_log_file(log_file)
                     ffmpeg_process = await create_subprocess_exec(
                                                                                                                             *command,
                                                                                                                             stdout=asyncioPIPE,
@@ -254,12 +261,7 @@ async def start_task(task):
                                                                                                                             )
                     ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
                     trash_objects.append(ffmpeg_status)
-                    while True:
-                        if not check_running_process(process_status.process_id):
-                            break
-                        if exists(log_file):
-                            LOGGER.info(f"Log File {log_file} Found , Starting Status Update")
-                            break
+                    LOGGER.info('Starting Status Update')
                     await process_status.update_status(ffmpeg_status)
                     if not check_running_process(process_status.process_id):
                         try:
