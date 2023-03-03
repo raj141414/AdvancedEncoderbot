@@ -52,6 +52,7 @@ stats - Get Stats
 speedtest - SpeedTest
 settings - Settings Section
 restart - Restart Bot
+herokurestart - Restart Heroku Dyno
 ```
 
 

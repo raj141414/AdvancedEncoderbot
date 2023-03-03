@@ -22,6 +22,7 @@ from re import findall
 from requests import get
 from bot_helper.Others.SpeedTest import speedtest
 from subprocess import run as srun
+from heroku3 import from_key
 
 status_update = {}
 status_update_lock = Lock()
@@ -548,6 +549,25 @@ async def _restart(event):
                 f.truncate(0)
                 f.write(f"{chat_id}\n{reply.id}\n")
         execl(executable, executable, *argv)
+        
+
+###############------Restart_Heroku------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/herokurestart', func=lambda e: owner_checker(e)))
+async def _heroku_restart(event):
+        chat_id = event.message.chat.id
+        if Config.HEROKU_APP_NAME and Config.HEROKU_API_KEY:
+            heroku_conn = from_key(Config.HEROKU_API_KEY)
+            reply = await event.reply("♻Restarting Heroku Dyno...")
+            with open(".restartmsg", "w") as f:
+                    f.truncate(0)
+                    f.write(f"{chat_id}\n{reply.id}\n")
+            for dyno in heroku_conn.app(Config.HEROKU_APP_NAME).dynos():
+                LOGGER.info(str(dyno))
+                LOGGER.info(str(dyno.command))
+                dyno.restart()
+        else:
+            await event.reply("❗Heroku App Name Or Heroku API Key Not Found")
+        return
 
 
 ###############------Get_Logs_Message------###############

@@ -86,6 +86,8 @@ class Config:
     SESSION_STRING = environ.get("SESSION_STRING","")
     RUNNING_TASK_LIMIT = int(environ.get("RUNNING_TASK_LIMIT",""))
     AUTO_SET_BOT_CMDS = eval(environ.get("AUTO_SET_BOT_CMDS","False"))
+    HEROKU_APP_NAME = environ.get("HEROKU_APP_NAME", False)
+    HEROKU_API_KEY = environ.get("HEROKU_API_KEY", False)
     FINISHED_PROGRESS_STR = environ.get("FINISHED_PROGRESS_STR", '■')
     UNFINISHED_PROGRESS_STR = environ.get("UNFINISHED_PROGRESS_STR", '□')
     try:
