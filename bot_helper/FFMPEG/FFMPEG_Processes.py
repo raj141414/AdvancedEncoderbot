@@ -207,6 +207,7 @@ class FFMPEG:
                 create_direc(direc)
                 output_meta = f"{direc}/{get_output_name(process_status)}"
                 custom_metadata_title = get_data()[process_status.user_id]['metadata']
+                process_status.update_process_message(f"🪀Changing MetaData\n{process_status.get_task_details()}")
                 cmd_meta = ["ffmpeg", "-i", f"{dl_loc}", f"-metadata:s:a", f"title={custom_metadata_title}", f"-metadata:s:s", f"title={custom_metadata_title}", "-map", "0", "-c", "copy", '-y', f"{output_meta}"]
                 met_result = await run_process_command(cmd_meta)
                 if not met_result:
