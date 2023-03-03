@@ -426,6 +426,8 @@ class ProcessStatus:
                                 if not check_running_process(self.process_id):
                                                 await self.event.reply("🔒Task Cancelled By User")
                                                 break
+                                if status.returncode:
+                                        break
                                 if exists(status.log_file):
                                         with open(status.log_file, 'r+') as file:
                                                 ffmpeg_text = file.read()

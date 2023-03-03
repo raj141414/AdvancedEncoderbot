@@ -284,8 +284,11 @@ async def start_task(task):
                             LOGGER.info(str(e))
                         break
                     else:
-                        await ffmpeg_process.wait()
-                        return_code = ffmpeg_process.returncode
+                        if ffmpeg_status.returncode:
+                                return_code = ffmpeg_status.returncode
+                        else:
+                                await ffmpeg_process.wait()
+                                return_code = ffmpeg_process.returncode
                         if return_code==0:
                                 output_list.append(output_file)
                                 process_status.replace_send_list(output_list)

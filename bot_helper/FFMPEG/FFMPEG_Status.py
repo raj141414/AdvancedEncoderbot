@@ -18,6 +18,7 @@ class FfmpegStatus:
         self.output_file = output_file
         self.duration = duration
         self.process_logs = []
+        self.returncode = False
     
     def input_size(self):
         return self.input_file_size
@@ -54,4 +55,8 @@ class FfmpegStatus:
                 else:
                         break
         LOGGER.info(f'FFMPEG Log Saver Completed : {process_id}')
+        if check_running_process(process_id):
+            await self.process.wait()
+            self.returncode = self.process.returncode
+            LOGGER.info(f'FFMPEG Return Code : {self.returncode}')
         return
