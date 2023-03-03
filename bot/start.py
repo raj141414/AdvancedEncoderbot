@@ -12,7 +12,7 @@ from time import time
 from asyncio import create_task
 from bot_helper.Database.User_Data import get_data, new_user, change_task_limit, get_task_limit, saveoptions, get_host_stats
 from bot_helper.Telegram.Telegram_Client import Telegram
-from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_user_id, get_queued_tasks_len, refresh_tasks, remove_from_working_task
+from bot_helper.Process.Running_Tasks import add_task, get_status_message, get_user_id, get_queued_tasks_len, refresh_tasks, remove_from_working_task, get_ffmpeg_log_file
 from bot_helper.Process.Running_Process import remove_running_process
 from asyncio import Lock
 from psutil import virtual_memory, cpu_percent, disk_usage
@@ -727,7 +727,30 @@ async def _cancel(event):
                 return
         else:
                 await event.reply(f'❗Give Me Process ID To Cancel.')
+        return
+
+
+###############------FFMPEF Log------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/ffmpeg', func=lambda e: user_auth_checker(e)))
+async def _ffmpeg_log(event):
+        chat_id = event.message.chat.id
+        commands = event.message.message.split(' ')
+        if len(commands)==3:
+                processx = commands[1]
+                process_id = commands[2]
+                try:
+                        if processx=="log":
+                            log_file = await get_ffmpeg_log_file(process_id)
+                            if log_file:
+                                await TELETHON_CLIENT.send_file(chat_id, file=log_file, allow_cache=False)
+                            else:
+                                await event.reply("❗Log File Not Found")
+                except Exception as e:
+                        await event.reply(str(e))
                 return
+        else:
+                await event.reply(f'❗Give Me Process ID.')
+        return
 
 ###############------Compress------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/compress', func=lambda e: user_auth_checker(e)))

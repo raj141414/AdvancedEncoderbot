@@ -168,6 +168,18 @@ async def remove_from_working_task(process_id):
     return False
 
 
+
+async def get_ffmpeg_log_file(process_id):
+    async with working_task_lock:
+        for task in working_task:
+                if task['process_status'].process_id==process_id:
+                    if exists(f"{task['process_status'].dir}/FFMPEG_LOG.txt"):
+                        return f"{task['process_status'].dir}/FFMPEG_LOG.txt"
+                    else:
+                        return False
+    return False
+
+
 async def get_status_message(reply):
                 if not len(working_task) and not len(queued_task):
                         return False

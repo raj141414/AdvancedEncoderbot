@@ -473,6 +473,7 @@ class ProcessStatus:
                                                         f'**Processed**: {get_readable_time(elapsed_time)} of {get_readable_time(status.duration)}\n'\
                                                         f'**Speed**: {speed}x | **ETA**: {get_readable_time(floor( (status.duration - elapsed_time) / speed))}'\
                                                         f'{ffmpeg_status_foot(status, self.user_id, self.start_time, time_in_us)}\n'\
+                                                        f'`/ffmpeg log {self.process_id}`\n'\
                                                         f"`/cancel process {self.process_id}`"
                                 self.status_message = text
                                 await asynciosleep(0.5)
