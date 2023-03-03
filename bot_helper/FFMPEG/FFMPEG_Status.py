@@ -1,6 +1,11 @@
 from os.path import getsize
 from bot_helper.Others.Names import Names
+from bot_helper.Process.Running_Process import check_running_process
+from aiofiles import open as aio_open
+from config.config import Config
 
+
+LOGGER = Config.LOGGER
 
 
 class FfmpegStatus:
@@ -29,3 +34,23 @@ class FfmpegStatus:
     
     def type(self):
         return Names.ffmpeg
+    
+    
+    async def logger(self, process_id, process_dir):
+        LOGGER.info(f'Starting FFMPEG Log Saver: {process_id}')
+        while True:
+                try:
+                    async for line in self.process.stderr:
+                            if not check_running_process(process_id):
+                                    LOGGER.info(f'FFMPEG Log Saver Cancelled : {process_id}')
+                                    break
+                            line = line.decode('utf-8').strip()
+                            print(line)
+                            async with aio_open(f"{process_dir}/FFMPEG_LOG.txt", "a+", encoding="utf-8") as f:
+                                        await f.write(f'{str(line)}\n')
+                except ValueError:
+                        continue
+                else:
+                        break
+        LOGGER.info(f'FFMPEG Log Saver Completed : {process_id}')
+        return

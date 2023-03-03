@@ -17,11 +17,21 @@ from bot_helper.Rclone.Rclone_Upload import upload_drive
 from os import remove
 
 
+
+LOGGER = Config.LOGGER
+working_task=[]
+working_task_lock = Lock()
+queued_task = []
+queued_task_lock = Lock()
+process_status_checker_value = [0]
+process_status_checker_lock = Lock()
+
+
+
 def create_log_file(log_file):
     with open(log_file, 'w') as _:
         LOGGER.info(f'Log File Created : {log_file}')
     return
-
 
 
 async def clear_trash(task, trash_objects, multi_tasks):
@@ -70,15 +80,6 @@ async def upload_files(process_status):
     else:
         await upload_drive(process_status)
     return
-
-
-LOGGER = Config.LOGGER
-working_task=[]
-working_task_lock = Lock()
-queued_task = []
-queued_task_lock = Lock()
-process_status_checker_value = [0]
-process_status_checker_lock = Lock()
 
 
 async def process_status_checker():
@@ -260,6 +261,7 @@ async def start_task(task):
                                                                                                                             stderr=asyncioPIPE,
                                                                                                                             )
                     ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
+                    create_task(ffmpeg_status.logger(process_status.process_id, process_status.dir))
                     trash_objects.append(ffmpeg_status)
                     LOGGER.info('Starting Status Update')
                     await process_status.update_status(ffmpeg_status)
@@ -276,10 +278,13 @@ async def start_task(task):
                                 output_list.append(output_file)
                                 process_status.replace_send_list(output_list)
                         else:
-                            with open(f"{process_status.dir}/FFMPEG_LOG.txt", "w", encoding="utf-8") as f:
-                                        f.write(str(ffmpeg_status.process_logs))
-                            await process_status.event.client.send_file(process_status.chat_id, file=f"{process_status.dir}/FFMPEG_LOG.txt", allow_cache=False, reply_to=process_status.event.message, caption=f"❌{process_status.process_type} Process Error\n\nReturn Code: {return_code}\n\nFileName: {input_file.split('/')[-1]}")
-                            remove(f"{process_status.dir}/FFMPEG_LOG.txt")
+                            if exists(f"{process_status.dir}/FFMPEG_LOG.txt"):
+                                    # with open(f"{process_status.dir}/FFMPEG_LOG.txt", "w", encoding="utf-8") as f:
+                                    #             f.write(str(ffmpeg_status.process_logs))
+                                    await process_status.event.client.send_file(process_status.chat_id, file=f"{process_status.dir}/FFMPEG_LOG.txt", allow_cache=False, reply_to=process_status.event.message, caption=f"❌{process_status.process_type} Process Error\n\nReturn Code: {return_code}\n\nFileName: {input_file.split('/')[-1]}")
+                                    remove(f"{process_status.dir}/FFMPEG_LOG.txt")
+                            else:
+                                await process_status.event.reply(f"❗FFMPEG Log File Not Found")
                             break
                         process_completed = True
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:

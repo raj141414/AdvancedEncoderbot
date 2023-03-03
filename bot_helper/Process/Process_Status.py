@@ -417,11 +417,11 @@ class ProcessStatus:
                                         LOGGER.info(f"Status Update Stopped, {status.process_status} Was Returned")
                                         break
                         elif status.type()==Names.ffmpeg:
-                                line = await get_ffmpeg_process_line(status.process)
-                                if line:
-                                        line = line.decode('utf-8').strip()
-                                        status.save_log(line)
-                                        print(line)
+                                # line = await get_ffmpeg_process_line(status.process)
+                                # if line:
+                                #         line = line.decode('utf-8').strip()
+                                #         status.save_log(line)
+                                #         print(line)
                                 if not check_running_process(self.process_id):
                                                 await self.event.reply("🔒Task Cancelled By User")
                                                 break
@@ -443,13 +443,13 @@ class ProcessStatus:
                                         if error_no == 30:
                                                 if exists(status.log_file):
                                                         try:
-                                                                LOGGER.info(f"FFMPEG Log File Data Start>\n{str(ffmpeg_text)}\n<end FFMPEG Log File Data")
+                                                                LOGGER.info(f"FFMPEG Process Log File Data Start>\n{str(ffmpeg_text)}\n<end FFMPEG Log File Data")
                                                         except:
                                                                 LOGGER.info(f"Failed To Get FFMPEG Log Data [{str(len(ffmpeg_text))}]")
                                                         await self.event.reply(f'❗Some Error Occurred.')
                                                 else:
                                                         LOGGER.info(f"FFMPEG Log File {status.log_file} Not Found.")
-                                                        await self.event.reply(f'❗FFMPEG Log File Not Found.')
+                                                        await self.event.reply(f'❗FFMPEG Process Log File Not Found.')
                                         if error_no==100:
                                                 break
                                         error_no+=1
