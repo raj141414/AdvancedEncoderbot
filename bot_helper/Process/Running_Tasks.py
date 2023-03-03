@@ -261,7 +261,7 @@ async def start_task(task):
                                                                                                                             stderr=asyncioPIPE,
                                                                                                                             )
                     ffmpeg_status = FfmpegStatus(ffmpeg_process, log_file, input_file, output_file, file_duration)
-                    create_task(ffmpeg_status.logger(process_status.process_id, process_status.dir))
+                    create_task(ffmpeg_status.logger(process_status.process_id, process_status.dir, command))
                     trash_objects.append(ffmpeg_status)
                     LOGGER.info('Starting Status Update')
                     await process_status.update_status(ffmpeg_status)

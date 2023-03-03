@@ -36,8 +36,10 @@ class FfmpegStatus:
         return Names.ffmpeg
     
     
-    async def logger(self, process_id, process_dir):
+    async def logger(self, process_id, process_dir, command):
         LOGGER.info(f'Starting FFMPEG Log Saver: {process_id}')
+        async with aio_open(f"{process_dir}/FFMPEG_LOG.txt", "a+", encoding="utf-8") as f:
+                    await f.write(f'{str(command)}\n')
         while True:
                 try:
                     async for line in self.process.stderr:
