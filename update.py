@@ -3,7 +3,6 @@ from logging.handlers import RotatingFileHandler
 from os import environ
 from os.path import exists
 from subprocess import run as srun, call as scall
-from pkg_resources import working_set
 from requests import get
 from dotenv import load_dotenv, dotenv_values
 
@@ -49,8 +48,7 @@ else:
 
 UPDATE_PACKAGES = environ.get('UPDATE_PACKAGES', 'False')
 if UPDATE_PACKAGES.lower() == 'true':
-    packages = [dist.project_name for dist in working_set]
-    scall("pip install " + ' '.join(packages), shell=True)
+    scall("pip install -r requirements.txt", shell=True)
 
 UPSTREAM_REPO = environ.get('UPSTREAM_REPO', '')
 if len(UPSTREAM_REPO) == 0:
