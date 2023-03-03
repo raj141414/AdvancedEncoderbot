@@ -231,7 +231,7 @@ async def start_task(task):
             
     if process_completed and process_status.process_type in Names.FFMPEG_PROCESSES:
             process_completed = False
-            if process_status.process_type!=Names.merge:
+            if process_status.process_type not in [Names.merge, Names.changeMetadata]:
                 if not len(multi_tasks):
                         await FFMPEG.select_audio(process_status)
                         await FFMPEG.change_metadata(process_status)

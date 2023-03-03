@@ -14,20 +14,23 @@ class Names:
     gensample = "VideoSample"
     genss ="GenSS"
     leech="Leech"
+    changeMetadata = 'ChangeMetadata'
     STATUS = {compress: "🏮Compressing", 
                         watermark: "🛺Adding Watermark",
                         merge: "🍧Merging", 
                         softmux: "🎮SoftMuxing Subtitles", 
                         softremux: "🛩SoftReMuxing Subtitles",
                         convert: "🚜Converting Video", 
-                        hardmux: "🚍HardMuxing Subtitle"}
+                        hardmux: "🚍HardMuxing Subtitle",
+                        changeMetadata: "🪀Changing MetaData"}
     FFMPEG_PROCESSES = [compress, 
                                                         watermark, 
                                                         merge, 
                                                         softmux, 
                                                         softremux, 
                                                         convert, 
-                                                        hardmux]
+                                                        hardmux,
+                                                        changeMetadata]
     STATUS_UPLOADING = "🔼Uploading"
     STATUS_CLONING= "🧬Cloning"
     STATUS_DOWNLOADING = "🔽Downloading"

@@ -161,7 +161,7 @@ def get_commands(process_status):
         else:
                 command += ['-c','copy']
         
-        command += ["-c:s", f"{get_data()[process_status.user_id]['softmux']['sub_codec']}", "-y", output_file]
+        command += ["-c:s", f"{get_data()[process_status.user_id]['softmux']['sub_codec']}", "-y", f"{output_file}"]
         
         return command, log_file, input_file, output_file, file_duration
     
@@ -198,7 +198,7 @@ def get_commands(process_status):
                                 command += ['-vcodec','libx264', '-preset', softremux_preset]
         else:
                 command += ['-c','copy']
-        command += ["-y", output_file]
+        command += ["-y", f"{output_file}"]
         return command, log_file, input_file, output_file, file_duration
     
     
@@ -273,5 +273,19 @@ def get_commands(process_status):
                 command+= ['-max_muxing_queue_size', f'{str(hardmux_queue_size)}']
         if hardmux_sync:
             command+= ['-vsync', '1', '-async', '-1']
-        command += ["-y", output_file]
+        command += ["-y", f"{output_file}"]
+        return command, log_file, input_file, output_file, file_duration
+    
+    
+    elif process_status.process_type==Names.changeMetadata:
+        create_direc(f"{process_status.dir}/metadata/")
+        log_file = f"{process_status.dir}/metadata/metadata_logs_{process_status.process_id}.txt"
+        input_file = f'{str(process_status.send_files[-1])}'
+        output_file = f"{process_status.dir}/metadata/{get_output_name(process_status)}"
+        file_duration = get_video_duration(input_file)
+        custom_metadata = process_status.custom_metadata
+        command = ["ffmpeg", "-i", f"{input_file}"]
+        for m in custom_metadata:
+            command+= command+m
+        command += ["-map", "0", "-c", "copy", '-y', f"{output_file}"]
         return command, log_file, input_file, output_file, file_duration

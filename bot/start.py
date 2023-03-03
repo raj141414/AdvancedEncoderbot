@@ -269,6 +269,23 @@ async def ask_text(chat_id, user_id, event, timeout, message, text_type, include
                 return False
 
 
+
+###############------Ask_Text_Event------###############
+async def ask_text_event(chat_id, user_id, event, timeout, message, message_hint=False):
+    async with TELETHON_CLIENT.conversation(chat_id) as conv:
+            handle = conv.wait_event(events.NewMessage(chats=chat_id, incoming=True, from_users=[user_id], func=lambda e: e.message.message), timeout=timeout)
+            msg = f"*️⃣ {str(message)} [{str(timeout)} secs]"
+            if message_hint:
+                msg += f"\n\n{message_hint}"
+            ask = await event.reply(msg)
+            try:
+                new_event = await handle
+            except Exception as e:
+                await ask.reply('🔃Timed Out! Task Has Been Cancelled.')
+                LOGGER.info(e)
+                return False
+            return new_event
+
 ###############------Ask_Text_List------###############
 async def ask_text_list(chat_id, user_id, event, timeout, message, include_list):
     async with TELETHON_CLIENT.conversation(chat_id) as conv:
@@ -754,6 +771,8 @@ async def _status(event):
         reply  = await event.reply("⏳Please Wait")
         chat_id = event.message.chat.id
         user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
         status_update_id = gen_random_string(5)
         async with status_update_lock:
             if chat_id not in status_update:
@@ -1421,6 +1440,59 @@ async def _leech_file(event):
         else:
             task['functions'].append(["TG", [link]])
         await get_thumbnail(process_status, ["/leech", "pass"], 120)
+        create_task(add_task(task))
+        await update_status_message(event)
+        return
+
+
+
+###############------Change_MetaData------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/changemetadata', func=lambda e: user_auth_checker(e)))
+async def _change_metadata(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        command = '/changemetadata'
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, [command, "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        metadata_event = await ask_text_event(chat_id, user_id, event, 120, "Send MetaData", message_hint="🔷`a` Is For Audio & `s` Is For Subtitle\n Send In The Format As Shown Below:\n\n`a:0-AudioLanguage-AudioTitle` (To Change Audio Number 1 Metadata)\n`s:0-SubLanguage-SubTitle` (To Change Subtitle Number 1 Metadata)\n\ne.g. `a:1-eng-nik66bots` (To Change Audio Number 1 Metadata)")
+        if not metadata_event:
+            return
+        custom_metadata_list = str(new_event.message.message).split('\n')
+        custom_metadata = []
+        for m in custom_metadata_list:
+            mdata = str(m).strip().split('-')
+            try:
+                sindex = mdata[0]
+                mlang =  str(mdata[1]).lower()
+                mtilte = str(mdata[2])
+                if not sindex.startswith('a:') or not sindex.startswith('s:'):
+                    await metadata_event.reply(f"❗{str(sindex)} This Is Not A Valid Input")
+                    return
+                custom_metadata.append([f'-metadata:s:{str(sindex)}', f"language='{mlang}", f'-metadata:s:{str(sindex)}', f"title='{mtilte}'"])
+            except Exception as e:
+                await metadata_event.reply(f"❗Invalid Metadata, Error: {str(e)}")
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.changeMetadata, custom_file_name, custom_metadata=custom_metadata)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
+        await get_thumbnail(process_status, [command, "pass"], 120)
         create_task(add_task(task))
         await update_status_message(event)
         return
