@@ -4,7 +4,7 @@ from shutil import rmtree
 from asyncio import get_event_loop
 from os.path import exists, isdir
 from subprocess import PIPE as subprocessPIPE, STDOUT as subprocessSTDOUT
-from subprocess import run as subprocessrun
+from subprocess import run as subprocessrun, check_output
 from shlex import split as shlexsplit
 from asyncio import create_subprocess_exec
 from asyncio.subprocess import PIPE
@@ -17,9 +17,13 @@ from random import choices
 from config.config import Config
 from dotenv import dotenv_values
 from psutil import disk_usage, cpu_percent, swap_memory, cpu_count, virtual_memory, net_io_counters, boot_time
+from magic import Magic
+from re import search as re_search
+from urllib.parse import parse_qs, urlparse
 
 
 #////////////////////////////////////Variables////////////////////////////////////#
+IMAGE_SUFFIXES = ("JPG", "JPX", "PNG", "CR2", "TIF", "BMP", "JXR", "PSD", "ICO", "HEIC", "JPEG")
 IST = timezone('Asia/Kolkata')
 botStartTime = time()
 LOGGER = Config.LOGGER
@@ -365,3 +369,73 @@ async def get_host_stats():
                     f'<b>Memory Free:</b> {get_size(memory.available)}\n'\
                     f'<b>Memory Used:</b> {get_size(memory.used)}'
         return stats
+
+
+###############------Get_Mime_Type------###############
+def get_mime_type(file_path):
+    mime = Magic(mime=True)
+    mime_type = mime.from_file(file_path)
+    mime_type = mime_type or "text/plain"
+    return mime_type
+
+
+###############------Check_File_Type------###############
+def get_media_streams(path):
+    is_video = False
+    is_audio = False
+    is_image = False
+
+    mime_type = get_mime_type(path)
+    if mime_type.startswith('audio'):
+        is_audio = True
+        return is_video, is_audio, is_image
+
+    if mime_type.startswith('image'):
+        is_image = True
+        return is_video, is_audio, is_image
+
+    if path.endswith('.bin') or not mime_type.startswith('video') and not mime_type.endswith('octet-stream'):
+        return is_video, is_audio, is_image
+
+    try:
+        result = check_output(["ffprobe", "-hide_banner", "-loglevel", "error", "-print_format",
+                               "json", "-show_streams", path]).decode('utf-8')
+    except Exception as e:
+        if not mime_type.endswith('octet-stream'):
+            LOGGER.error(f'{e}. Mostly file not found!')
+        return is_video, is_audio, is_image
+
+    fields = eval(result).get('streams')
+    if fields is None:
+        LOGGER.error(f"get_media_streams: {result}")
+        return is_video, is_audio, is_image
+
+    for stream in fields:
+        if stream.get('codec_type') == 'video':
+            is_video = True
+        elif stream.get('codec_type') == 'audio':
+            is_audio = True
+            
+    return is_video, is_audio, is_image
+
+
+###############------Get_File_Type------###############
+def get_file_type(up_path):
+    is_video, is_audio, is_image = get_media_streams(up_path)
+    is_image = is_image or up_path.upper().endswith(IMAGE_SUFFIXES)
+    return is_video, is_audio, is_image
+
+
+###############------Get_Gdrive_ID------###############
+def getIdFromUrl(link):
+        if "folders" in link or "file" in link:
+            regex = r"https:\/\/drive\.google\.com\/(?:drive(.*?)\/folders\/|file(.*?)?\/d\/)([-\w]+)"
+            res = re_search(regex,link)
+            if res is None:
+                return False
+            return res.group(3)
+        parsed = urlparse(link)
+        try:
+            return parse_qs(parsed.query)['id'][0]
+        except:
+            return False
