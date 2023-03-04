@@ -32,7 +32,8 @@ class Names:
                                                         softremux, 
                                                         convert, 
                                                         hardmux,
-                                                        changeMetadata]
+                                                        changeMetadata,
+                                                        changeindex]
     STATUS_UPLOADING = "🔼Uploading"
     STATUS_CLONING= "🧬Cloning"
     STATUS_DOWNLOADING = "🔽Downloading"
