@@ -90,6 +90,7 @@ class Config:
     HEROKU_API_KEY = environ.get("HEROKU_API_KEY", False)
     FINISHED_PROGRESS_STR = environ.get("FINISHED_PROGRESS_STR", '■')
     UNFINISHED_PROGRESS_STR = environ.get("UNFINISHED_PROGRESS_STR", '□')
+    TIMEZONE = environ.get("TIMEZONE", 'Asia/Kolkata')
     try:
         AUTH_GROUP_ID = int(environ.get("AUTH_GROUP_ID",""))
     except:

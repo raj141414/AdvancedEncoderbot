@@ -24,7 +24,7 @@ from urllib.parse import parse_qs, urlparse
 
 #////////////////////////////////////Variables////////////////////////////////////#
 IMAGE_SUFFIXES = ("JPG", "JPX", "PNG", "CR2", "TIF", "BMP", "JXR", "PSD", "ICO", "HEIC", "JPEG")
-IST = timezone('Asia/Kolkata')
+IST = timezone(Config.TIMEZONE)
 botStartTime = time()
 LOGGER = Config.LOGGER
 

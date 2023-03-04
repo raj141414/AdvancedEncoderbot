@@ -17,6 +17,7 @@ To configure this bot add the environment variables stated below. Or add them in
 - `UPDATE_PACKAGES` - (Optional)Set True if you want to update the packages.
 - `UPSTREAM_REPO` - (Optional)Your github repository link, if your repo is private add https://username:{githubtoken}@github.com/{username}/{reponame} format.
 - `UPSTREAM_BRANCH` - (Optional)Upstream branch for update.
+- `TIMEZONE` - (Optional)Timezone for clock time in status. Default is `Asia/Kolkata`.
 - `SAVE_TO_DATABASE` - (Required)Set value True if you want to use MongoDB Database else False.
 - `MONGODB_URI` - (Optional*)MongoDB URL to save data, only required when SAVE_TO_DATABASE's value is True.
 - `Use_Session_String` - (Required)Set value True if you want to use Telegram user session string to upload 4GB file to telegram else False.

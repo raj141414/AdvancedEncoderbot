@@ -5,7 +5,7 @@ from pytz import timezone
 
 
 #////////////////////////////////////Variables////////////////////////////////////#
-IST = timezone('Asia/Kolkata')
+IST = timezone(Config.TIMEZONE)
 LOGGER = Config.LOGGER
 if Config.SAVE_TO_DATABASE:
     bot_username = Config.NAME
