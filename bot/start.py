@@ -1568,7 +1568,7 @@ async def _change_index(event):
                 stream = str(mdata[0]).strip().lower()
                 mdata.pop(0)
                 cmd = []
-                for s in stream:
+                for s in mdata:
                     s = int(s.strip())-1
                     cmd.append("-map")
                     cmd.append(f"0:{stream}:{s}")
