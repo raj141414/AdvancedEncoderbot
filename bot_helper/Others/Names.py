@@ -15,6 +15,7 @@ class Names:
     genss ="GenSS"
     leech="Leech"
     changeMetadata = 'ChangeMetadata'
+    changeindex = "ChangeIndex"
     STATUS = {compress: "🏮Compressing", 
                         watermark: "🛺Adding Watermark",
                         merge: "🍧Merging", 
@@ -22,7 +23,8 @@ class Names:
                         softremux: "🛩SoftReMuxing Subtitles",
                         convert: "🚜Converting Video", 
                         hardmux: "🚍HardMuxing Subtitle",
-                        changeMetadata: "🪀Changing MetaData"}
+                        changeMetadata: "🪀Changing MetaData",
+                        changeindex: "🎨Changing Index"}
     FFMPEG_PROCESSES = [compress, 
                                                         watermark, 
                                                         merge, 

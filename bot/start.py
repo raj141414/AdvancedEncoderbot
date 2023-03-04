@@ -1537,6 +1537,61 @@ async def _change_metadata(event):
         await update_status_message(event)
         return
 
+
+###############------Change_index------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/changeindex', func=lambda e: user_auth_checker(e)))
+async def _change_index(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        command = '/changeindex'
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        link, custom_file_name = await get_link(event)
+        if link=="invalid":
+            await event.reply("❗Invalid link")
+            return
+        elif not link:
+            new_event = await ask_media_OR_url(event, chat_id, user_id, [command, "stop"], "Send Video or URL", 120, "video/", True)
+            if new_event and new_event not in ["cancelled", "stopped"]:
+                link = await get_url_from_message(new_event)
+            else:
+                return
+        index_event = await ask_text_event(chat_id, user_id, event, 120, "Send index", message_hint="🔷`a` Is For Audio & `s` Is For Subtitle\n🔷 Send In The Format As Shown Below:\n\n`a-3-1-2` (To Change Audio Index In 3rd, 1st and 2nd order)\n`s-2-1` (To Change Subtitle Index In 2nd and 1st order)")
+        if not index_event:
+            return
+        custom_index_list = str(index_event.message.message).split('\n')
+        custom_index = []
+        for m in custom_index_list:
+            mdata = str(m).strip().split('-')
+            LOGGER.info(mdata)
+            try:
+                stream = str(mdata[0]).strip().lower()
+                mdata.pop(0)
+                cmd = []
+                for s in stream:
+                    s = int(s.strip())-1
+                    cmd.append("-map")
+                    cmd.append(f"0:{stream}:{s}")
+                custom_index.append(cmd)
+            except Exception as e:
+                await index_event.reply(f"❗Invalid index, Error: {str(e)}")
+                return
+        user_name = get_username(event)
+        user_first_name = event.message.sender.first_name
+        process_status = ProcessStatus(user_id, chat_id, user_name, user_first_name, event, Names.changeindex, custom_file_name, custom_index=custom_index)
+        task = {}
+        task['process_status'] = process_status
+        task['functions'] = []
+        if type(link)==str:
+                task['functions'].append(["Aria", Aria2.add_aria2c_download, [link, process_status, False, False, False, False]])
+        else:
+            task['functions'].append(["TG", [link]])
+        await get_thumbnail(process_status, [command, "pass"], 120)
+        create_task(add_task(task))
+        await update_status_message(event)
+        return
+
+
 ###############------Leech_File------###############
 @TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/leech', func=lambda e: user_auth_checker(e)))
 async def _leech_file(event):
