@@ -1567,12 +1567,10 @@ async def _change_index(event):
             try:
                 stream = str(mdata[0]).strip().lower()
                 mdata.pop(0)
-                cmd = []
                 for s in mdata:
                     s = int(s.strip())-1
-                    cmd.append("-map")
-                    cmd.append(f"0:{stream}:{s}")
-                custom_index.append(cmd)
+                    custom_index.append("-map")
+                    custom_index.append(f"0:{stream}:{s}")
             except Exception as e:
                 await index_event.reply(f"❗Invalid index, Error: {str(e)}")
                 return
