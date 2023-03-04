@@ -210,7 +210,10 @@ class ProcessStatus:
                 self.status_message = f"🔁Initializing\n`/cancel process {self.process_id}`"
                 self.message = "Not Found"
                 self.caption = False
-                self.thumbnail = thumbnail
+                if not thumbnail and exists(f'./userdata/{str(user_id)}_Thumbnail.jpg'):
+                        self.thumbnail = f'./userdata/{str(user_id)}_Thumbnail.jpg'
+                else:
+                        self.thumbnail = thumbnail
                 self.process_type = process_type
                 self.start_time = start_time
                 self.convert_quality = 480

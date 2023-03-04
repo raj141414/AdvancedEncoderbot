@@ -449,6 +449,23 @@ async def ask_watermark(event, chat_id, user_id, cmd, wt_check, all_handle=False
     return False
 
 
+
+###############------Ask_Thumbnail------###############
+async def ask_thumbnail(event, chat_id, user_id, cmd):
+    Thumbnail_path = f'./userdata/{str(user_id)}_Thumbnail.jpg'
+    Thumbnail_check = exists(Thumbnail_path)
+    if Thumbnail_check:
+            text = f"Thumbnail Already Present\n\n🔷Send Me New Thumbnail To Replace."
+    else:
+            text = f"Thumbnail Not Present\n\n🔶Send Me Thumbnail To Save."
+    new_event = await ask_media_OR_url(event, chat_id, user_id, [f"/{cmd}", "stop"], text, 120, "image/", True, False, False)
+    if new_event and new_event not in ["cancelled", "stopped"]:
+        await TELETHON_CLIENT.download_media(new_event.message, Thumbnail_path)
+        if exists(Thumbnail_path):
+            return True
+    return False
+
+
 async def update_status_message(event):
         reply  = await event.reply("⏳Please Wait")
         chat_id = event.message.chat.id
@@ -625,6 +642,21 @@ async def _savewatermark(event):
             await event.reply("❗Failed To Get Watermark.")
         else:
             await event.reply("✅Watermark saved successfully.")
+        return
+
+
+###############------Save_Thumbnail------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/savethumb', func=lambda e: user_auth_checker(e)))
+async def _savethumb(event):
+        chat_id = event.message.chat.id
+        user_id = event.message.sender.id
+        if user_id not in get_data():
+                await new_user(user_id, SAVE_TO_DATABASE)
+        check_thumbnail = await ask_thumbnail(event, chat_id, user_id, "savethumb")
+        if not check_thumbnail:
+            await event.reply("❗Failed To Get Thumbnail.")
+        else:
+            await event.reply("✅Thumbnail saved successfully.")
         return
 
 
