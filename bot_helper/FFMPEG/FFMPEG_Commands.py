@@ -298,6 +298,7 @@ def get_commands(process_status):
         output_file = f"{process_status.dir}/index/{get_output_name(process_status)}"
         file_duration = get_video_duration(input_file)
         command = ['ffmpeg','-hide_banner', '-progress', f"{log_file}", '-i', f'{str(input_file)}']
-        command+= process_status.custom_index
+        for x in process_status.custom_index:
+            command.append(x)
         command += ["-c", "copy","-disposition:a:0", "default", '-y', f"{output_file}"]
         return command, log_file, input_file, output_file, file_duration
