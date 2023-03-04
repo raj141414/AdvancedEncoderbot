@@ -35,6 +35,7 @@ gensample - Generate Sample Video
 genss - Generate Screenshots
 changemetadata - Change Video Metadata
 savewatermark - Save Watermark Image
+savethumb - Save Static Thumbnail
 saveconfig - Save Rclone Config
 tasklimit - Change Task Limit
 status - Check Process Status

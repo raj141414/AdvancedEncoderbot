@@ -294,7 +294,7 @@ async def general_callback(event, txt, user_id, chat_id):
                 await event.answer(f"✅Split Size - {str(new_position)}")
             elif txt.startswith("generalcustomthumbnail"):
                 await saveoptions(user_id, 'custom_thumbnail', eval(new_position), SAVE_TO_DATABASE)
-                await event.answer(f"✅Custom Thumbnail - {str(new_position)}")
+                await event.answer(f"✅Dynamic Thumbnail - {str(new_position)}")
             elif txt.startswith("generalcustommetadata"):
                 if eval(new_position):
                         metadata = await get_metadata(chat_id, user_id, event, 120, "Send Metadata Title")
@@ -365,7 +365,7 @@ async def general_callback(event, txt, user_id, chat_id):
             KeyBoard.append([Button.inline(f'🛢Split Size - {str(split)}', 'nik66bots')])
             for board in gen_keyboard(['2GB', '4GB'], split, "generalsplit", 2, False):
                 KeyBoard.append(board)
-            KeyBoard.append([Button.inline(f'🖼Custom Thumbnail - {str(custom_thumbnail)}', 'nik66bots')])
+            KeyBoard.append([Button.inline(f'🖼Dynamic Thumbnail - {str(custom_thumbnail)}', 'nik66bots')])
             for board in gen_keyboard(bool_list, custom_thumbnail, "generalcustomthumbnail", 2, False):
                 KeyBoard.append(board)
             KeyBoard.append([Button.inline(f'🪀Custom Metadata - {str(custom_metadata)} [Click To See]', 'custom_metedata')])
