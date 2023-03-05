@@ -1,3 +1,5 @@
+import tracemalloc
+tracemalloc.start()
 from config.config import Config
 from sys import modules
 from importlib.util import spec_from_file_location, module_from_spec

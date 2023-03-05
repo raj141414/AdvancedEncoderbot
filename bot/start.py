@@ -23,9 +23,12 @@ from requests import get
 from bot_helper.Others.SpeedTest import speedtest
 from subprocess import run as srun
 from heroku3 import from_key
+import tracemalloc
+
 
 status_update = {}
 status_update_lock = Lock()
+s = None
 
 
 if not isdir('./userdata'):
@@ -1621,4 +1624,22 @@ async def _leech_file(event):
         await get_thumbnail(process_status, ["/leech", "pass"], 120)
         create_task(add_task(task))
         await update_status_message(event)
+        return
+
+
+
+###############------Check_Memory_Leak------###############
+@TELETHON_CLIENT.on(events.NewMessage(incoming=True, pattern='/memory', func=lambda e: user_auth_checker(e)))
+async def _check_memory(event):
+    global s
+    if not s:
+        s = tracemalloc.take_snapshot()
+        await event.reply("Snapshot Taken")
+        return
+    else:
+        lines = ""
+        top_stats = tracemalloc.take_snapshot().compare_to(s, 'lineno')
+        for stat in top_stats[:5]:
+            lines+= str(stat) + "\n"
+        await event.reply(str(lines))
         return
