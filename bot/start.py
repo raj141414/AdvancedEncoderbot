@@ -1571,6 +1571,7 @@ async def _change_index(event):
                     s = int(s.strip())-1
                     custom_index.append("-map")
                     custom_index.append(f"0:{stream}:{s}")
+                custom_index+= [f"-disposition:{stream}:0", "default"]
             except Exception as e:
                 await index_event.reply(f"❗Invalid index, Error: {str(e)}")
                 return
