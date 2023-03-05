@@ -14,3 +14,5 @@ ext.txt
 dcw
 aria2_download.py
 config.env
+heroku.yml
+docker-compose.yml
