@@ -352,7 +352,7 @@ async def get_host_stats():
         total, used, free, disk = disk_usage('/')
         swap = swap_memory()
         memory = virtual_memory()
-        stats =f'<b>Commit Date:</b> {last_commit}\nVersion: {Config.VERSION}\n\n'\
+        stats =f'<b>Commit Date:</b> {last_commit}\n\nVersion: {Config.VERSION}\n\n'\
                     f'<b>Bot Uptime:</b> {get_readable_time(time() - botStartTime)}\n'\
                     f'<b>OS Uptime:</b> {get_readable_time(time() - boot_time())}\n\n'\
                     f'<b>Total Disk Space:</b> {get_size(total)}\n'\
