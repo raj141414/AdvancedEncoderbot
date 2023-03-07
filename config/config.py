@@ -72,6 +72,7 @@ def get_mongo_data(MONGODB_URI, BOT_USERNAME, id, colz):
 
 ###############------Config_Section------###############
 class Config:
+    VERSION = '2.0.1'
     try:
         API_ID = int(environ.get("API_ID",""))
     except:

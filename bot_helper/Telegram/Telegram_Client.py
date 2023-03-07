@@ -189,6 +189,8 @@ class Telegram:
                 for output_file in process_status.send_files:
                     if getsize(output_file)>split_size:
                         send_files.remove(output_file)
+                        file_name = str(output_file).split('/')[-1]
+                        process_status.update_process_message(f"✂Splitting Video\n`{str(file_name)}`\n{process_status.get_task_details()}")
                         splitted_files = await FFMPEG.split_video_file(output_file, split_size, process_status.dir, process_status.event)
                         if splitted_files:
                             send_files += splitted_files

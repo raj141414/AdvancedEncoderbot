@@ -108,6 +108,7 @@ class FFMPEG:
 ###############------Split_Video------###############
     async def split_video_file(file, split_size, dirpath, event):
         success = []
+        split_size = split_size-5000
         try:
             size = getsize(file)
             parts = ceil(size/split_size)
