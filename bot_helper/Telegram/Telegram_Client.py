@@ -79,6 +79,7 @@ class Telegram:
                                 await upload_single_drive(process_status, files[i], status, r_config, drive_name, filename)
                         else:
                             await event.reply(f"❌File Size Is Greater Than Telegram Upload Limit")
+                            LOGGER.info(f"File Size: {file_size}, Limit: {size_limit}, Name: {filename}")
                 elif file_size<=2097151000:
                         if get_data()[process_status.user_id]['tgupload']=="Telethon":
                                 try:
@@ -126,6 +127,7 @@ class Telegram:
                                     await event.reply(f"❗Telethon User Error While Uploading File {filename}\n\nError: {str(e)}")
                     else:
                             await event.reply(f"❌File Size Is Greater Than Telegram Upload Limit")
+                            LOGGER.info(f"File Size: {file_size}, Name: {filename}")
                 if not check_running_process(process_id):
                         await event.reply("🔒Task Cancelled By User")
                         break
@@ -195,4 +197,5 @@ class Telegram:
                         if splitted_files:
                             send_files += splitted_files
                 process_status.replace_send_list(send_files)
+                LOGGER.info(str(send_files))
         await Telegram.upload_videos_on_telegram(process_status)
