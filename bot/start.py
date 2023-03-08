@@ -156,6 +156,8 @@ for user_id in get_data():
             dw_file_from_url(link, r_config)
         except Exception as e:
             LOGGER.info(f"❗Error While Downloading Rclone Config For User_ID {user_id} From Link {link}")
+    else:
+        LOGGER.info(f"🟡Rclone Config Link Not Found For User_ID {user_id}")
             
 
 ###############------Check_Magenet------###############
