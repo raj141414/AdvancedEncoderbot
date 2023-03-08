@@ -34,6 +34,8 @@ if not isdir('./userdata'):
 
 
 
+
+
 #////////////////////////////////////Variables////////////////////////////////////#
 sudo_users = Config.SUDO_USERS
 owner_id = Config.OWNER_ID
@@ -143,6 +145,18 @@ def dw_file_from_url(url, filename):
                         if chunk:
                                 fd.write(chunk)
         return
+    
+###############------Download_Rclone_Config------###############
+for user_id in get_data():
+    link = get_data()[user_id]['rclone_config_link']
+    if link:
+        LOGGER.info(f"🔽Downloading Rclone Config For User_ID {user_id} From Link {link}")
+        r_config = f'./userdata/{str(user_id)}_rclone.conf'
+        try:
+            dw_file_from_url(link, r_config)
+        except Exception as e:
+            LOGGER.info(f"❗Error While Downloading Rclone Config For User_ID {user_id} From Link {link}")
+            
 
 ###############------Check_Magenet------###############
 def is_magnet(url: str):
@@ -528,6 +542,7 @@ async def _saverclone(event):
             else:
                 link = str(new_event.message.message)
                 dw_file_from_url(link, r_config)
+                await saveoptions(user_id, 'rclone_config_link', link, SAVE_TO_DATABASE)
             if not exists(r_config):
                 await new_event.reply("❌Failed To Download Config File.")
                 return
