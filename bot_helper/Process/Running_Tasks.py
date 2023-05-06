@@ -317,7 +317,7 @@ async def start_task(task):
     elif process_completed and process_status.process_type==Names.genss:
         await FFMPEG.generate_ss(process_status, force_gen=True)
     elif process_completed and process_status.process_type==Names.leech:
-        await Telegram.upload_videos(process_status)
+        await upload_drive(process_status)
     await clear_trash(task, trash_objects, multi_tasks)
     await task_manager()
     return
